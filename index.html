@@ -7,6 +7,31 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <body>
+    <!-- 1. LOBBY AREA -->
+    <div id="lobby-area">
+        <h2>Pachisa Multiplayer</h2>
+        <input type="text" id="playerName" placeholder="Apna Naam Likho" />
+        <br><br>
+        <button id="create-room-btn">Create New Room</button>
+        <br><br>
+        <hr>
+        <p>Ya doston ka room join karo:</p>
+        <input type="text" id="roomIdInput" placeholder="Room ID (e.g. 1234)" />
+        <br><br>
+        <button id="join-room-btn">Join Room</button>
+    </div>
+
+    <!-- 2. GAME BOARD (Isko default hide kar diya hai) -->
+    <div id="game-board" style="display: none;">
+        <div id="room-info">Room ID: <span id="display-room-id"></span></div>
+        
+        <!-- Aapka purana opponent, slots, aur hand wala code exactly waise hi rahega -->
+        <div id="opponents-area">...</div>
+        <div id="slots-area">...</div>
+        <button id="lock-btn" disabled>Lock Cards</button>
+        <div id="player-hand">...</div>
+    </div>
     <div id="game-board">
         <!-- Opponents Info -->
         <div id="opponents-area">
