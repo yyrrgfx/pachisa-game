@@ -184,3 +184,6 @@ body {
         font-size: 0.8rem;
     }
 }
+/* History Panel Styles */
+.history-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+.history-player { text-align: center; font-size: 1rem; background: white; color: black; padding: 8px; border-radius: 5px; flex: 1; margin: 0 5px; }
