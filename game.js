@@ -112,31 +112,37 @@ function renderPlayerHand(cardsArray) {
 
 // 2. Setup Drop Zones (Slots & Hand)
 function setupDragAndDrop() {
-    // Make both the Slots AND the Hand drop targets
     const dropZones = [...slots, playerHandDiv];
 
     dropZones.forEach(zone => {
+        // Mobile ko drop zone samjhane ke liye dragover aur dragenter dono chahiye
         zone.addEventListener('dragover', function(e) {
-            e.preventDefault(); // Zaroori hai drop allow karne ke liye
+            e.preventDefault(); 
+        });
+        
+        zone.addEventListener('dragenter', function(e) {
+            e.preventDefault(); // <-- MOBILE KE LIYE ZAROORI
         });
 
         zone.addEventListener('drop', function(e) {
             e.preventDefault();
+            e.stopPropagation(); // <-- MOBILE DOUBLE DROP BUG FIX
             
-            // Logic: Ek slot me max 3 cards hi aa sakte hain. 
-            // Hand me kitne bhi wapas aa sakte hain.
-            if (this.classList.contains('slot')) {
-                if (this.children.length < 3) {
+            if (draggedCard) {
+                if (this.classList.contains('slot')) {
+                    if (this.children.length < 3) {
+                        this.appendChild(draggedCard);
+                    }
+                } else {
+                    // Wapas player hand me daalna
                     this.appendChild(draggedCard);
                 }
-            } else {
-                // If dropping back to player hand
-                this.appendChild(draggedCard);
+                draggedCard = null;
+                validateSlots(); // Lock button check karne ke liye
             }
         });
     });
 }
-
 // 3. Validation: Lock button tabhi chalega jab 15 cards exactly 5 slots me honge
 function validateSlots() {
     let totalCardsInSlots = 0;
