@@ -9,6 +9,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
 // Card logic constants
 const SUITS = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
 // 11 = J, 12 = Q, 13 = K, 14 = A
