@@ -317,7 +317,7 @@ lockBtn.addEventListener('click', () => {
 let isBattleRunning = false;
 
 function startBattleAnimation(playersData) {
-    if(isBattleRunning) return; // Prevent multiple triggers
+    if(isBattleRunning) return; 
     isBattleRunning = true;
 
     let battleArena = document.getElementById('battle-arena');
@@ -331,31 +331,47 @@ function startBattleAnimation(playersData) {
     let roundPoints = {};
     globalPlayerNames.forEach(n => roundPoints[n] = 0);
 
+    // YEH VARIABLE HISTORY STORE KAREGA
+    let lastRoundHistoryHTML = ''; 
+
     let battleInterval = setInterval(() => {
         if(currentSlot > 4) {
             clearInterval(battleInterval);
             if(battleArena) battleArena.style.display = 'none';
+            
+            // BATTLE KHATAM HONE PAR HISTORY MODAL MEIN DATA DAAL DO
+            document.getElementById('history-content').innerHTML = lastRoundHistoryHTML;
+            
             updateGlobalScores(roundPoints); 
             return;
         }
 
         let slotWinner = null;
         let highestScore = -1;
+        let slotCardsHTML = ''; // History ke liye is round ke cards
+
         if(battleCards) battleCards.innerHTML = ''; 
         if(battleTitle) battleTitle.innerText = `Fighting: SLOT ${currentSlot + 1}`;
 
         globalPlayerNames.forEach(name => {
             let slotData = playersData[name].lockedSlots[currentSlot];
             
-            // Render card info in arena
+            // J, Q, K, A format karna
+            let c1 = slotData.cards[0], c2 = slotData.cards[1], c3 = slotData.cards[2];
+            let r1 = rankNames[c1.rank] || c1.rank, r2 = rankNames[c2.rank] || c2.rank, r3 = rankNames[c3.rank] || c3.rank;
+            let s1 = suitSymbols[c1.suit], s2 = suitSymbols[c2.suit], s3 = suitSymbols[c3.suit];
+
+            let cardString = `${r1}${s1} | ${r2}${s2} | ${r3}${s3}`;
+
+            // Screen par fight dikhana
             if(battleCards) {
                 battleCards.innerHTML += `<div style="display:inline-block; margin: 15px; padding:10px; background:#fff; color:#000; border-radius:5px;">
-                    <strong>${name}</strong><br>
-                    ${slotData.cards[0].rank}${suitSymbols[slotData.cards[0].suit]} | 
-                    ${slotData.cards[1].rank}${suitSymbols[slotData.cards[1].suit]} | 
-                    ${slotData.cards[2].rank}${suitSymbols[slotData.cards[2].suit]}
+                    <strong>${name}</strong><br>${cardString}
                 </div>`;
             }
+
+            // History panel ke liye row banana
+            slotCardsHTML += `<div class="history-player"><strong>${name}</strong><br>${cardString}</div>`;
 
             if(slotData.score > highestScore) {
                 highestScore = slotData.score;
@@ -363,13 +379,20 @@ function startBattleAnimation(playersData) {
             }
         });
 
+        // Is slot ki history record karna
+        lastRoundHistoryHTML += `
+            <div style="background: #1a252f; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid #7f8c8d;">
+                <h4 style="margin: 0 0 10px 0; color: #f1c40f;">Slot ${currentSlot + 1} - Winner: 🎉 ${slotWinner}</h4>
+                <div class="history-row">${slotCardsHTML}</div>
+            </div>
+        `;
+
         if(battleWinner) battleWinner.innerText = `🎉 ${slotWinner} wins Slot ${currentSlot + 1}!`;
         roundPoints[slotWinner] += 1;
         
         currentSlot++;
     }, 3000); 
 }
-
 function updateGlobalScores(roundPoints) {
     // Sirf Host update push karega DB me taaki 3 guna data na badhe
     if (isRoomCreator) {
@@ -434,3 +457,9 @@ function resetRound() {
         }, 1000);
     }
 }
+// Score & History Modal Logic
+document.getElementById('show-score-btn').onclick = () => document.getElementById('scoreboard-modal').style.display = 'block';
+document.getElementById('close-score').onclick = () => document.getElementById('scoreboard-modal').style.display = 'none';
+
+document.getElementById('show-history-btn').onclick = () => document.getElementById('history-modal').style.display = 'block';
+document.getElementById('close-history').onclick = () => document.getElementById('history-modal').style.display = 'none';
