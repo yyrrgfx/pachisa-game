@@ -25,6 +25,45 @@ body {
     padding: 5px;
     gap: 5px;
 }
+/* Virtual Table & Avatars */
+#virtual-table {
+    display: flex; justify-content: space-around; align-items: center;
+    background: #27ae60; padding: 20px; border-radius: 100px;
+    margin: 20px auto; width: 90%; max-width: 600px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+.avatar {
+    background: #34495e; color: white; padding: 15px; border-radius: 50%;
+    text-align: center; width: 60px; height: 60px; font-weight: bold;
+}
+#center-table { display: flex; gap: 10px; }
+#deck-visual, #unusable-pile {
+    width: 45px; height: 65px; background: #fff; color: #000;
+    border: 2px solid #333; border-radius: 5px; display: flex;
+    align-items: center; justify-content: center; font-size: 0.8rem;
+}
+
+/* Floating Scoreboard */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 1000;
+}
+.modal-content {
+    background: #2c3e50; margin: 15% auto; padding: 20px;
+    width: 80%; max-width: 400px; border-radius: 10px; color: white;
+}
+#close-score { float: right; font-size: 28px; cursor: pointer; color: red; }
+#score-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+#score-table th, #score-table td { border: 1px solid #7f8c8d; padding: 10px; text-align: center; }
+
+/* Battle Arena */
+#battle-arena {
+    position: fixed; top: 20%; left: 10%; width: 80%; background: rgba(0,0,0,0.9);
+    padding: 30px; border-radius: 15px; z-index: 500; color: gold; text-align: center;
+}
+.discard-anim {
+    transition: all 0.5s ease; transform: translateY(-200px) scale(0.5); opacity: 0;
+}
 
 #player-hand {
     display: flex;
