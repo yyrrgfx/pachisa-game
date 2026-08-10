@@ -1,0 +1,108 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+}
+
+#slots-area {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.slot {
+    width: 160px;
+    height: 120px;
+    background-color: #34495e;
+    border: 2px dashed #7f8c8d;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    gap: 5px;
+}
+
+#player-hand {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    min-height: 120px;
+    padding: 20px;
+    background-color: #1a252f;
+    border-radius: 10px;
+}
+
+.card {
+    width: 45px;
+    height: 65px;
+    background-color: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    touch-action: none; /* <-- YEH LINE ADD KARO */
+}
+
+.card:active {
+    cursor: grabbing;
+}
+
+.red { color: #e74c3c; }
+.black { color: #2c3e50; }
+
+#lock-btn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+#lock-btn:disabled {
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+}
+/* --- YEH NAYA CODE FILE KE SABSE NEECHE PASTE KARO --- */
+#slots-area {
+    display: flex;
+    flex-wrap: wrap; /* Mobile par slots ko next line me bhej dega */
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Mobile Screens ke liye (600px se choti screens) */
+@media (max-width: 600px) {
+    .slot {
+        width: 100px; /* Slot ka size chota kiya */
+        height: 90px;
+        gap: 3px;
+    }
+    
+    .card {
+        width: 28px; /* Card ka size chota kiya */
+        height: 42px;
+        font-size: 0.8rem;
+    }
+
+    #player-hand {
+        padding: 10px;
+        gap: 5px;
+    }
+    
+    #opponents-area {
+        font-size: 0.9rem; /* Opponent text chota kiya */
+    }
+}

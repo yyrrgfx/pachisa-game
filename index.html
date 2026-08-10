@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pachisa - 25 Point Card Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-board">
+        <!-- Opponents Info -->
+        <div id="opponents-area">
+            <div class="player-status" id="player2-status">Player 2: Waiting...</div>
+            <div id="timerDisplay">60</div>
+            <div class="player-status" id="player3-status">Player 3: Waiting...</div>
+        </div>
+
+        <!-- 5 Slots for the Current Player -->
+        <div id="slots-area">
+            <div class="slot" id="slot-1" data-slot="1">Slot 1</div>
+            <div class="slot" id="slot-2" data-slot="2">Slot 2</div>
+            <div class="slot" id="slot-3" data-slot="3">Slot 3</div>
+            <div class="slot" id="slot-4" data-slot="4">Slot 4</div>
+            <div class="slot" id="slot-5" data-slot="5">Slot 5</div>
+        </div>
+
+        <button id="lock-btn" disabled>Lock Cards</button>
+
+        <!-- Current Player's 17 Cards -->
+        <div id="player-hand"></div>
+    </div>
+
+    <!-- Firebase SDKs (Hum baad me initialize karenge) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <!-- Polyfill for Mobile Touch Drag and Drop -->
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+    <script>
+        // Polyfill ko on karna taaki mobile par drag and drop chal sake
+        MobileDragDrop.polyfill({
+            dragImageTranslateOverride: MobileDragDrop.scrollBehaviourDragImageTranslateOverride
+        });
+        
+        // Prevent default mobile scrolling when touching cards
+        window.addEventListener('touchmove', function() {}, {passive: false});
+    </script>
+    
+    <!-- Aapki existing file yahan rahegi -->
+    <script src="game.js"></script>
+</body>
+</html>
