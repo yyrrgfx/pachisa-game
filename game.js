@@ -245,29 +245,103 @@ lockBtn.addEventListener('click', () => {
     
     // YAHAN SE FIRBASE KO DATA BHEJNE KA LOGIC TRIGGER HOGA
 });
-const roomId = prompt("Enter Room ID (or create one):");
-const playerName = prompt("Enter your name:");
+// Global Variables
+let roomId = "";
+let playerName = "";
 
-// 1. Room/Player ka State Firebase par push karna
-function submitToFirebase(finalSortedSlots) {
-    const playerRef = db.ref(`rooms/${roomId}/players/${playerName}`);
-    playerRef.set({
-        name: playerName,
-        slots: finalSortedSlots.map(s => s.cards.map(c => ({suit: c.suit, rank: c.rank}))),
-        score: finalSortedSlots[0].score // Root score for sync
+// Firebase Initialize (Aapka purana config yahan rahega)
+// firebase.initializeApp(firebaseConfig);
+// const db = firebase.database();
+// const auth = firebase.auth();
+
+// UI Elements
+const lobbyArea = document.getElementById('lobby-area');
+const gameBoard = document.getElementById('game-board');
+
+// 1. Authenticate silently on load
+auth.signInAnonymously().then(() => {
+    console.log("Firebase Auth Success! Ready to Create/Join.");
+}).catch((error) => console.error(error));
+
+// 2. CREATE ROOM Logic
+document.getElementById('create-room-btn').addEventListener('click', () => {
+    playerName = document.getElementById('playerName').value.trim();
+    if (!playerName) return alert("Bhai, apna naam toh likho!");
+
+    // Ek random 4 digit room code generate karo (e.g., "4829")
+    roomId = Math.floor(1000 + Math.random() * 9000).toString(); 
+
+    // Firebase par room banao
+    db.ref(`rooms/${roomId}`).set({
+        status: "WAITING",
+        created_at: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        enterRoom(roomId, playerName);
+        alert(`Room Ban Gaya! Room ID hai: ${roomId}. Doston ko batao.`);
     });
+});
+
+// 3. JOIN ROOM Logic
+document.getElementById('join-room-btn').addEventListener('click', () => {
+    playerName = document.getElementById('playerName').value.trim();
+    let enteredRoomId = document.getElementById('roomIdInput').value.trim();
+
+    if (!playerName || !enteredRoomId) return alert("Naam aur Room ID dono zaroori hain!");
+
+    // Check karo room exist karta hai ya nahi
+    db.ref(`rooms/${enteredRoomId}`).once('value', (snapshot) => {
+        if (snapshot.exists()) {
+            let roomData = snapshot.val();
+            let playersCount = roomData.players ? Object.keys(roomData.players).length : 0;
+            
+            // Pachisa me 3 players ki limit hoti hai
+            if (playersCount < 3) {
+                enterRoom(enteredRoomId, playerName);
+            } else {
+                alert("Ye room full ho chuka hai (3 players max).");
+            }
+        } else {
+            alert("Room ID galat hai! Aisa koi room nahi bana.");
+        }
+    });
+});
+
+// 4. Enter Room & Shift UI
+function enterRoom(rId, pName) {
+    roomId = rId; // Set global variable
+    
+    // Player ko room node me add karo
+    db.ref(`rooms/${roomId}/players/${pName}`).set({
+        name: pName,
+        status: "JOINED"
+    });
+
+    // Lobby chupao, Game Board dikhao
+    lobbyArea.style.display = "none";
+    gameBoard.style.display = "block";
+    document.getElementById('display-room-id').innerText = roomId;
+
+    // Room listen karna shuru karo (Opponents ke liye)
+    listenToRoomUpdates();
 }
 
-// 2. Real-time Listening (Jab sab submit kar dein)
-db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
-    const playersData = snapshot.val();
-    const count = Object.keys(playersData || {}).length;
-    
-    if (count === 3) {
-        console.log("All 3 players locked! Let the round begin.");
-        compareAllPlayers(playersData);
-    }
-});
+// 5. Room Listeners (Kaun kaun aaya hai dekho)
+function listenToRoomUpdates() {
+    db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+        const playersData = snapshot.val();
+        if (playersData) {
+            let count = Object.keys(playersData).length;
+            console.log(`Players in room: ${count}/3`, playersData);
+            
+            // Yahan se aap apna purana dealCards() ya UI updates chala sakte ho jab count === 3 ho jaye
+            if (count === 3) {
+                console.log("Room full! Start dealing cards.");
+                // alert("All players joined! Game starting...");
+                // dealCards(); <-- Ye function chalao
+            }
+        }
+    });
+}
 function compareAllPlayers(playersData) {
     // playersData mein teeno players ke slots hain
     // Ab aap step-by-step slots compare karke points assign kar sakte hain
