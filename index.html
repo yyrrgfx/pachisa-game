@@ -9,16 +9,18 @@
 <body>
     <body>
     <!-- 1. LOBBY AREA -->
-    <div id="lobby-area">
+ <div id="lobby-area">
         <h2>Pachisa Multiplayer</h2>
-        <input type="text" id="playerName" placeholder="Apna Naam Likho" />
-        <br><br>
-        <button id="create-room-btn">Create New Room</button>
-        <br><br>
-        <hr>
+        
+        <!-- TOP: Sirf Create Room ka button -->
+        <button id="create-room-btn" style="background-color: #27ae60;">Create New Room</button>
+        
+        <br><br><hr><br>
+        
+        <!-- BOTTOM: Join Room ka section -->
         <p>Ya doston ka room join karo:</p>
+        <input type="text" id="playerName" placeholder="Apna Naam Likho" />
         <input type="text" id="roomIdInput" placeholder="Room ID (e.g. 1234)" />
-        <br><br>
         <button id="join-room-btn">Join Room</button>
     </div>
 
