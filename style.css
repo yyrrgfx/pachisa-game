@@ -50,7 +50,7 @@ body {
     cursor: grab;
     user-select: none;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    touch-action: none; /* <-- YEH LINE ADD KARO */
+    touch-action: none; 
 }
 
 .card:active {
