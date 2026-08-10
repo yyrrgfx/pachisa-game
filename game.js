@@ -266,13 +266,13 @@ auth.signInAnonymously().then(() => {
 
 // 2. CREATE ROOM Logic
 document.getElementById('create-room-btn').addEventListener('click', () => {
-    playerName = document.getElementById('playerName').value.trim();
-    if (!playerName) return alert("Bhai, apna naam toh likho!");
+    // Agar box mein naam hai toh wo le lo, warna popup se pooch lo
+    playerName = document.getElementById('playerName').value.trim() || prompt("Bhai, apna naam likho room banane ke liye:");
+    
+    if (!playerName) return; // Agar cancel kar diya toh wapas jao
 
-    // Ek random 4 digit room code generate karo (e.g., "4829")
     roomId = Math.floor(1000 + Math.random() * 9000).toString(); 
 
-    // Firebase par room banao
     db.ref(`rooms/${roomId}`).set({
         status: "WAITING",
         created_at: firebase.database.ServerValue.TIMESTAMP
