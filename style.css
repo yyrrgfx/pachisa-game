@@ -5,27 +5,45 @@ body {
     text-align: center;
 }
 
-#slots-area {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 30px 0;
+/* ============================
+   Lobby & Room Info
+============================ */
+#lobby-area {
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #34495e;
+    max-width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+#lobby-area input {
+    padding: 10px;
+    width: 90%;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: none;
+}
+#lobby-area button {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+#lobby-area button:hover { background-color: #2980b9; }
+
+#room-info {
+    font-size: 1.2rem;
+    color: #f1c40f;
+    margin-bottom: 10px;
+    font-weight: bold;
 }
 
-.slot {
-    width: 160px;
-    height: 120px;
-    background-color: #34495e;
-    border: 2px dashed #7f8c8d;
-    border-radius: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-    gap: 5px;
-}
-/* Virtual Table & Avatars */
+/* ============================
+   Virtual Table & Avatars
+============================ */
 #virtual-table {
     display: flex; justify-content: space-around; align-items: center;
     background: #27ae60; padding: 20px; border-radius: 100px;
@@ -43,28 +61,29 @@ body {
     align-items: center; justify-content: center; font-size: 0.8rem;
 }
 
-/* Floating Scoreboard */
-.modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); z-index: 1000;
+/* ============================
+   Slots & Player Hand
+============================ */
+#slots-area {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
 }
-.modal-content {
-    background: #2c3e50; margin: 15% auto; padding: 20px;
-    width: 80%; max-width: 400px; border-radius: 10px; color: white;
+.slot {
+    width: 160px;
+    height: 120px;
+    background-color: #34495e;
+    border: 2px dashed #7f8c8d;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    gap: 5px;
 }
-#close-score { float: right; font-size: 28px; cursor: pointer; color: red; }
-#score-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-#score-table th, #score-table td { border: 1px solid #7f8c8d; padding: 10px; text-align: center; }
-
-/* Battle Arena */
-#battle-arena {
-    position: fixed; top: 20%; left: 10%; width: 80%; background: rgba(0,0,0,0.9);
-    padding: 30px; border-radius: 15px; z-index: 500; color: gold; text-align: center;
-}
-.discard-anim {
-    transition: all 0.5s ease; transform: translateY(-200px) scale(0.5); opacity: 0;
-}
-
 #player-hand {
     display: flex;
     flex-wrap: wrap;
@@ -75,7 +94,6 @@ body {
     background-color: #1a252f;
     border-radius: 10px;
 }
-
 .card {
     width: 45px;
     height: 65px;
@@ -91,11 +109,9 @@ body {
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     touch-action: none; 
 }
-
 .card:active {
     cursor: grabbing;
 }
-
 .red { color: #e74c3c; }
 .black { color: #2c3e50; }
 
@@ -109,73 +125,62 @@ body {
     cursor: pointer;
     margin-bottom: 20px;
 }
-
 #lock-btn:disabled {
     background-color: #7f8c8d;
     cursor: not-allowed;
 }
-/* --- YEH NAYA CODE FILE KE SABSE NEECHE PASTE KARO --- */
-#slots-area {
-    display: flex;
-    flex-wrap: wrap; /* Mobile par slots ko next line me bhej dega */
-    justify-content: center;
-    gap: 10px;
+
+/* ============================
+   Floating Scoreboard & Battle Arena
+============================ */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 1000;
+}
+.modal-content {
+    background: #2c3e50; margin: 15% auto; padding: 20px;
+    width: 80%; max-width: 400px; border-radius: 10px; color: white;
+}
+#close-score { float: right; font-size: 28px; cursor: pointer; color: red; }
+#score-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+#score-table th, #score-table td { border: 1px solid #7f8c8d; padding: 10px; text-align: center; }
+
+#battle-arena {
+    position: fixed; top: 20%; left: 10%; width: 80%; background: rgba(0,0,0,0.9);
+    padding: 30px; border-radius: 15px; z-index: 500; color: gold; text-align: center;
+}
+.discard-anim {
+    transition: all 0.5s ease; transform: translateY(-200px) scale(0.5); opacity: 0;
 }
 
-/* Mobile Screens ke liye (600px se choti screens) */
+/* ============================
+   Mobile Responsive
+============================ */
 @media (max-width: 600px) {
     .slot {
-        width: 100px; /* Slot ka size chota kiya */
+        width: 100px; 
         height: 90px;
         gap: 3px;
     }
-    
     .card {
-        width: 28px; /* Card ka size chota kiya */
+        width: 28px; 
         height: 42px;
         font-size: 0.8rem;
     }
-
     #player-hand {
         padding: 10px;
         gap: 5px;
     }
     
-    #opponents-area {
-        font-size: 0.9rem; /* Opponent text chota kiya */
+    /* Virtual Table adjustments for mobile */
+    #virtual-table {
+        padding: 10px;
+        border-radius: 50px;
     }
-}
-#lobby-area {
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #34495e;
-    max-width: 300px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-
-#lobby-area input {
-    padding: 10px;
-    width: 90%;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: none;
-}
-
-#lobby-area button {
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-}
-#lobby-area button:hover { background-color: #2980b9; }
-
-#room-info {
-    font-size: 1.2rem;
-    color: #f1c40f;
-    margin-bottom: 10px;
-    font-weight: bold;
+    .avatar {
+        width: 45px;
+        height: 45px;
+        padding: 10px;
+        font-size: 0.8rem;
+    }
 }
