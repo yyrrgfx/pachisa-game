@@ -820,56 +820,30 @@ function getHandScore(cards) {
 // ==========================================
 
 function renderPlayerHand(cardsArray) {
-
-    playerHandDiv.innerHTML = "";
-
-    if (!cardsArray || !cardsArray.length) {
-        return;
-    }
-
-    // IMPORTANT:
-    // Card order exactly same rahega.
-    // Koi suit grouping / sorting nahi.
+    playerHandDiv.innerHTML = '';
 
     cardsArray.forEach((card, index) => {
 
         const cardEl =
-            document.createElement("div");
+            document.createElement('div');
+
+        cardEl.classList.add('card');
 
         cardEl.classList.add(
-            "card",
-            "hand-card",
-            "dealing"
+            (
+                card.suit === 'Hearts' ||
+                card.suit === 'Diamonds'
+            )
+                ? 'red'
+                : 'black'
         );
 
-        // Red / Black
-        if (
-            card.suit === "Hearts" ||
-            card.suit === "Diamonds"
-        ) {
-
-            cardEl.classList.add("red");
-
-        } else {
-
-            cardEl.classList.add("black");
-
-        }
-
-        const displayRank =
+        let displayRank =
             rankNames[card.rank] ||
             card.rank;
 
-        // Card design
-        cardEl.innerHTML = `
-            <div class="card-rank">
-                ${displayRank}
-            </div>
-
-            <div class="card-suit">
-                ${suitSymbols[card.suit]}
-            </div>
-        `;
+        cardEl.innerText =
+            `${displayRank}${suitSymbols[card.suit]}`;
 
         cardEl.dataset.suit =
             card.suit;
@@ -881,46 +855,38 @@ function renderPlayerHand(cardsArray) {
             `card-${index}`;
 
         cardEl.setAttribute(
-            "draggable",
-            "true"
+            'draggable',
+            'true'
         );
 
-        // ==================================
-        // ONE BY ONE DEAL ANIMATION
-        // ==================================
 
-        cardEl.style.animationDelay =
-            `${index * 90}ms`;
-
-
-        // ==================================
-        // DRAG START
-        // ==================================
-
+        // ORIGINAL DRAG FEEL
         cardEl.addEventListener(
-            "dragstart",
+            'dragstart',
             function () {
 
                 draggedCard = this;
 
-                this.classList.add(
-                    "dragging-card"
+                setTimeout(
+                    () => {
+                        this.style.opacity = '0.5';
+                    },
+                    0
                 );
 
             }
         );
 
 
-        // ==================================
-        // DRAG END
-        // ==================================
-
         cardEl.addEventListener(
-            "dragend",
+            'dragend',
             function () {
 
-                this.classList.remove(
-                    "dragging-card"
+                setTimeout(
+                    () => {
+                        this.style.opacity = '1';
+                    },
+                    0
                 );
 
                 draggedCard = null;
@@ -938,13 +904,8 @@ function renderPlayerHand(cardsArray) {
     });
 
 
-    // Drag & Drop
     setupDragAndDrop();
-
-    validateSlots();
-
 }
-
 // ==========================================
 // 10. DRAG & DROP
 // ==========================================
@@ -960,59 +921,49 @@ function setupDragAndDrop() {
         playerHandDiv
     ];
 
-
     dropZones.forEach(
         zone => {
 
             zone.addEventListener(
-                "dragover",
-                e => {
-
-                    e.preventDefault();
-
-                }
+                'dragover',
+                e => e.preventDefault()
             );
 
-
             zone.addEventListener(
-                "dragenter",
-                e => {
-
-                    e.preventDefault();
-
-                }
+                'dragenter',
+                e => e.preventDefault()
             );
 
-
             zone.addEventListener(
-                "drop",
-                function (e) {
+                'drop',
+                function(e) {
 
                     e.preventDefault();
 
                     e.stopPropagation();
 
 
-                    if (!draggedCard) {
-
-                        return;
-
-                    }
-
-
-                    // ==================================
-                    // SLOT
-                    // ==================================
-
-                    if (
-                        this.classList.contains(
-                            "slot"
-                        )
-                    ) {
+                    if (draggedCard) {
 
                         if (
-                            this.children.length < 3
+                            this.classList.contains(
+                                'slot'
+                            )
                         ) {
+
+                            if (
+                                this.children.length < 3
+                            ) {
+
+                                this.appendChild(
+                                    draggedCard
+                                );
+
+                            }
+
+                        }
+
+                        else {
 
                             this.appendChild(
                                 draggedCard
@@ -1020,86 +971,19 @@ function setupDragAndDrop() {
 
                         }
 
-                    }
 
+                        draggedCard = null;
 
-                    // ==================================
-                    // PLAYER HAND
-                    // ==================================
-
-                    else {
-
-                        const suit =
-                            draggedCard.dataset.suit;
-
-
-                        let group =
-                            playerHandDiv
-                                .querySelector(
-                                    `.hand-suit-group[data-suit="${suit}"]`
-                                );
-
-
-                        // Group doesn't exist
-                        if (!group) {
-
-                            group =
-                                document.createElement(
-                                    "div"
-                                );
-
-                            group.className =
-                                "hand-suit-group";
-
-                            group.dataset.suit =
-                                suit;
-
-
-                            const label =
-                                document.createElement(
-                                    "div"
-                                );
-
-                            label.className =
-                                "suit-label";
-
-                            label.innerText =
-                                suitSymbols[suit];
-
-
-                            group.appendChild(
-                                label
-                            );
-
-
-                            playerHandDiv.appendChild(
-                                group
-                            );
-
-                        }
-
-
-                        group.appendChild(
-                            draggedCard
-                        );
+                        validateSlots();
 
                     }
-
-
-                    draggedCard =
-                        null;
-
-
-                    validateSlots();
 
                 }
             );
 
         }
     );
-
 }
-
 
 // ==========================================
 // 11. VALIDATE SLOTS
