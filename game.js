@@ -928,6 +928,10 @@ function renderPlayerHand(
 // 10. DRAG & DROP
 // ==========================================
 
+// ==========================================
+// DRAG & DROP
+// ==========================================
+
 function setupDragAndDrop() {
 
     const dropZones = [
@@ -968,8 +972,16 @@ function setupDragAndDrop() {
                     e.stopPropagation();
 
 
-                    if (!draggedCard) return;
+                    if (!draggedCard) {
 
+                        return;
+
+                    }
+
+
+                    // ==================================
+                    // SLOT
+                    // ==================================
 
                     if (
                         this.classList.contains(
@@ -989,9 +1001,64 @@ function setupDragAndDrop() {
 
                     }
 
+
+                    // ==================================
+                    // PLAYER HAND
+                    // ==================================
+
                     else {
 
-                        this.appendChild(
+                        const suit =
+                            draggedCard.dataset.suit;
+
+
+                        let group =
+                            playerHandDiv
+                                .querySelector(
+                                    `.hand-suit-group[data-suit="${suit}"]`
+                                );
+
+
+                        // Group doesn't exist
+                        if (!group) {
+
+                            group =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            group.className =
+                                "hand-suit-group";
+
+                            group.dataset.suit =
+                                suit;
+
+
+                            const label =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            label.className =
+                                "suit-label";
+
+                            label.innerText =
+                                suitSymbols[suit];
+
+
+                            group.appendChild(
+                                label
+                            );
+
+
+                            playerHandDiv.appendChild(
+                                group
+                            );
+
+                        }
+
+
+                        group.appendChild(
                             draggedCard
                         );
 
