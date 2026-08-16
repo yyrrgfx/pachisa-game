@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pachisa - 25 Point Card Game</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-fixed.css">
 </head>
 <body>
     <!-- 1. LOBBY AREA -->
@@ -29,24 +29,12 @@
         <!-- Room ID Display -->
         <div id="room-info">Room ID: <span id="display-room-id"></span></div>
 
-        <!-- Floating Scoreboard Button -->
-        <button id="show-score-btn" style="position: absolute; top: 10px; right: 10px; background: #f39c12; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🏆 Scores</button>
-<!-- Floating Scoreboard Button -->
-        <button id="show-score-btn" style="position: absolute; top: 10px; right: 10px; background: #f39c12; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🏆 Scores</button>
-        
-        <!-- YEH NAYA BUTTON ADD KAREIN -->
-        <button id="show-history-btn" style="position: absolute; top: 10px; right: 110px; background: #9b59b6; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🕒 Last Round</button>
-
-        <!-- Floating Scoreboard Modal -->
-        <div id="scoreboard-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span id="close-score">&times;</span>
-                <h2>Points Table (First to 25 Wins)</h2>
-                <table id="score-table">
-                    <tr><th>Player</th><th>Points</th></tr>
-                </table>
-            </div>
+        <div class="top-actions">
+            <button id="show-history-btn" class="top-btn history-btn">🕒 Last Round</button>
+            <button id="show-score-btn" class="top-btn score-btn">🏆 Scores</button>
         </div>
+
+        <div id="live-scoreboard" class="live-scoreboard"></div>
 
         <!-- YEH NAYA HISTORY MODAL ADD KAREIN -->
         <div id="history-modal" class="modal" style="display: none;">
@@ -58,14 +46,17 @@
                 </div>
             </div>
         </div>
-        <!-- Floating Scoreboard Modal -->
+
         <div id="scoreboard-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span id="close-score">&times;</span>
-                <h2>Points Table (First to 25 Wins)</h2>
+            <div class="modal-content scoreboard-card">
+                <button id="close-score" class="modal-close">&times;</button>
+                <div class="scoreboard-heading">
+                    <div class="trophy">🏆</div>
+                    <div><h2>25 POINTS</h2><p>First player to reach 25 wins</p></div>
+                </div>
                 <table id="score-table">
-                    <tr><th>Player</th><th>Points</th></tr>
-                    <!-- JS se rows yahan aayengi -->
+                    <thead><tr><th>PLAYER</th><th>POINTS</th></tr></thead>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -123,6 +114,6 @@
     </script>
     
     <!-- Aapki existing file yahan rahegi -->
-    <script src="game.js"></script>
+    <script src="game-fixed.js"></script>
 </body>
 </html>
