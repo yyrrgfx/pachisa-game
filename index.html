@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pachisa - 25 Point Card Game</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-fixed.css">
 </head>
 <body>
     <!-- 1. LOBBY AREA -->
@@ -74,52 +74,26 @@
             <div class="avatar" id="opp2-avatar">⏳ Wait...</div>
         </div>
 
-        <!-- ==========================================
-     BATTLE ARENA
-     ========================================== -->
-
-<div id="battle-arena" style="display: none;">
-
-    <div class="battle-header">
-
-        <div>
-            <div class="battle-small-title">
-                PACHISA • BATTLE
+        <!-- Battle Arena -->
+        <div id="battle-arena" style="display: none;">
+            <div class="battle-header">
+                <div>
+                    <div class="battle-small-title">PACHISA BATTLE</div>
+                    <h2 id="battle-title">Fighting: SLOT 1</h2>
+                </div>
+                <div class="battle-step">
+                    <span id="battle-step-number">1</span>
+                    <small>/ 5</small>
+                </div>
             </div>
 
-            <h2 id="battle-title">
-                SLOT 1
-            </h2>
+            <div id="battle-cards"></div>
+
+            <div id="battle-winner"></div>
+
+            <button id="battle-next-btn" type="button">Next → Slot 2</button>
         </div>
 
-        <div class="battle-step">
-            <span id="battle-step-number">1</span>
-            <small>/ 5</small>
-        </div>
-
-    </div>
-
-
-    <div id="battle-cards">
-        <!-- Cards JS se aayenge -->
-    </div>
-
-
-    <div id="battle-winner">
-        <!-- Winner JS se aayega -->
-    </div>
-
-
-    <!-- USER CONTROL -->
-    <button
-        id="battle-next-btn"
-        class="battle-next-btn"
-        type="button"
-    >
-        👆 TAP TO REVEAL
-    </button>
-
-</div>
         <!-- 5 Slots for the Current Player -->
         <div id="slots-area">
             <div class="slot" id="slot-1" data-slot="1">Slot 1</div>
@@ -153,6 +127,6 @@
     </script>
     
     <!-- Aapki existing file yahan rahegi -->
-    <script src="game.js"></script>
+    <script src="game-fixed.js"></script>
 </body>
 </html>
