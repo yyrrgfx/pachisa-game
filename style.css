@@ -1,21 +1,65 @@
+/* =========================================================
+   PACHISA CARD GAME
+   FINAL CLEAN STYLE
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #2c3e50;
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(46, 204, 113, .18),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #071e18,
+            #0d2f24 45%,
+            #071813
+        );
     color: white;
     text-align: center;
 }
 
-/* ============================
-   Lobby & Room Info
-============================ */
+
+/* =========================================================
+   GAME BOARD
+   ========================================================= */
+
+#game-board {
+    min-height: 100vh;
+    padding: 20px 14px 40px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+
+/* =========================================================
+   LOBBY
+   ========================================================= */
+
 #lobby-area {
     margin: 50px auto;
     padding: 20px;
     background-color: #34495e;
     max-width: 300px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow:
+        0 4px 10px
+        rgba(0, 0, 0, .5);
 }
+
 #lobby-area input {
     padding: 10px;
     width: 90%;
@@ -23,6 +67,7 @@ body {
     border-radius: 5px;
     border: none;
 }
+
 #lobby-area button {
     padding: 10px 20px;
     background-color: #3498db;
@@ -32,221 +77,1101 @@ body {
     cursor: pointer;
     width: 100%;
 }
-#lobby-area button:hover { background-color: #2980b9; }
+
+#lobby-area button:hover {
+    background-color: #2980b9;
+}
+
+
+/* =========================================================
+   TOP ACTIONS
+   ========================================================= */
+
+.top-actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 8px;
+    z-index: 20;
+}
+
+.top-btn {
+    border: 1px solid rgba(255,255,255,.18);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,0,0,.25);
+}
+
+.score-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #f39c12,
+            #e67e22
+        );
+}
+
+.history-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #8e44ad,
+            #6c3483
+        );
+}
+
+
+/* =========================================================
+   ROOM INFO
+   ========================================================= */
 
 #room-info {
-    font-size: 1.2rem;
-    color: #f1c40f;
-    margin-bottom: 10px;
-    font-weight: bold;
+    display: inline-block;
+
+    margin:
+        4px auto 12px;
+
+    padding:
+        9px 16px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(0,0,0,.28);
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    color:
+        #ffe082;
+
+    font-size:
+        1.2rem;
+
+    font-weight:
+        bold;
 }
 
-/* ============================
-   Virtual Table & Avatars
-============================ */
+
+/* =========================================================
+   LIVE SCOREBOARD
+   ========================================================= */
+
+.live-scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    margin:
+        8px auto 16px;
+
+    max-width:
+        720px;
+}
+
+.live-score-player {
+    min-width: 105px;
+
+    padding:
+        8px 12px;
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(255,255,255,.08);
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        14px;
+
+    font-size:
+        .85rem;
+
+    box-shadow:
+        0 6px 18px
+        rgba(0,0,0,.18);
+}
+
+.live-score-player strong {
+    color:
+        #ffd166;
+}
+
+
+/* =========================================================
+   VIRTUAL TABLE
+   ========================================================= */
+
 #virtual-table {
-    display: flex; justify-content: space-around; align-items: center;
-    background: #27ae60; padding: 20px; border-radius: 100px;
-    margin: 20px auto; width: 90%; max-width: 600px;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-}
-.avatar {
-    background: #34495e; color: white; padding: 15px; border-radius: 50%;
-    text-align: center; width: 60px; height: 60px; font-weight: bold;
-}
-#center-table { display: flex; gap: 10px; }
-#deck-visual, #unusable-pile {
-    width: 45px; height: 65px; background: #fff; color: #000;
-    border: 2px solid #333; border-radius: 5px; display: flex;
-    align-items: center; justify-content: center; font-size: 0.8rem;
+    display: flex;
+
+    justify-content:
+        space-around;
+
+    align-items:
+        center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #199b5b 0%,
+            #087a45 58%,
+            #075b36 100%
+        );
+
+    padding:
+        20px;
+
+    border:
+        7px solid
+        #6b3e1e;
+
+    outline:
+        2px solid
+        rgba(255,215,130,.35);
+
+    border-radius:
+        140px;
+
+    margin:
+        20px auto;
+
+    width:
+        90%;
+
+    max-width:
+        760px;
+
+    min-height:
+        145px;
+
+    position:
+        relative;
+
+    box-shadow:
+        inset 0 0 35px
+        rgba(0,0,0,.45),
+
+        0 18px 45px
+        rgba(0,0,0,.3);
 }
 
-/* ============================
-   Slots & Player Hand
-============================ */
+
+/* =========================================================
+   AVATARS
+   ========================================================= */
+
+.avatar {
+    background:
+        #34495e;
+
+    color:
+        white;
+
+    padding:
+        15px;
+
+    border-radius:
+        50%;
+
+    text-align:
+        center;
+
+    width:
+        60px;
+
+    height:
+        60px;
+
+    font-weight:
+        bold;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border:
+        2px solid
+        rgba(255,255,255,.2);
+
+    box-shadow:
+        0 7px 18px
+        rgba(0,0,0,.35);
+
+    overflow:
+        hidden;
+
+    word-break:
+        break-word;
+}
+
+
+/* =========================================================
+   CENTER DECK
+   ========================================================= */
+
+#center-table {
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    padding:
+        8px;
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(0,0,0,.16);
+}
+
+#deck-visual,
+#unusable-pile {
+    width:
+        45px;
+
+    height:
+        65px;
+
+    background:
+        #fff;
+
+    color:
+        #000;
+
+    border:
+        2px solid
+        #333;
+
+    border-radius:
+        8px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        .8rem;
+
+    box-shadow:
+        0 4px 12px
+        rgba(0,0,0,.35);
+}
+
+
+/* =========================================================
+   SLOTS AREA
+   ========================================================= */
+
 #slots-area {
-    display: flex;
-    flex-wrap: wrap; 
-    justify-content: center;
-    gap: 15px;
-    margin: 30px 0;
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    justify-content:
+        center;
+
+    gap:
+        10px;
+
+    margin:
+        22px auto;
+
+    max-width:
+        950px;
 }
+
+
+/* =========================================================
+   SLOTS
+   ========================================================= */
+
 .slot {
-    width: 160px;
-    height: 120px;
-    background-color: #34495e;
-    border: 2px dashed #7f8c8d;
-    border-radius: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-    gap: 5px;
+    position:
+        relative;
+
+    width:
+        160px;
+
+    height:
+        120px;
+
+    min-width:
+        160px;
+
+    min-height:
+        120px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.09),
+            rgba(0,0,0,.14)
+        );
+
+    border:
+        2px dashed
+        rgba(255,255,255,.28);
+
+    border-radius:
+        8px;
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        5px;
+
+    gap:
+        5px;
+
+    box-shadow:
+        inset 0 0 18px
+        rgba(0,0,0,.15);
+
+    transition:
+        border-color .2s ease;
 }
+
+.slot:hover {
+    border-color:
+        #ffd166;
+}
+
+
+/* =========================================================
+   MAIN PLAYER HAND
+   ORIGINAL SIMPLE STYLE
+   ========================================================= */
+
 #player-hand {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    min-height: 120px;
-    padding: 20px;
-    background-color: #1a252f;
-    border-radius: 10px;
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    min-height:
+        120px;
+
+    padding:
+        20px;
+
+    max-width:
+        950px;
+
+    margin:
+        0 auto;
+
+    background:
+        rgba(0,0,0,.22);
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        inset 0 0 25px
+        rgba(0,0,0,.22);
 }
-.card {
-    width: 45px;
-    height: 65px;
-    background-color: white;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    cursor: grab;
-    user-select: none;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    touch-action: none; 
+
+
+/* =========================================================
+   PLAYER CARDS
+   ORIGINAL SIZE
+   ========================================================= */
+
+.card,
+.hand-card {
+    width:
+        45px;
+
+    height:
+        65px;
+
+    min-width:
+        45px;
+
+    min-height:
+        65px;
+
+    max-width:
+        45px;
+
+    max-height:
+        65px;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    background:
+        #fff;
+
+    border:
+        1px solid
+        #ddd;
+
+    border-radius:
+        5px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-weight:
+        bold;
+
+    font-size:
+        1.2rem;
+
+    line-height:
+        1;
+
+    cursor:
+        grab;
+
+    user-select:
+        none;
+
+    box-shadow:
+        0 2px 5px
+        rgba(0,0,0,.3);
+
+    touch-action:
+        none;
+
+    opacity:
+        1;
+
+    transform:
+        none;
+
+    transition:
+        none;
+
+    position:
+        relative;
+
+    flex-shrink:
+        0;
 }
-.card:active {
-    cursor: grabbing;
+
+
+/* =========================================================
+   CARD ACTIVE / DRAG
+   ========================================================= */
+
+.card:active,
+.hand-card:active {
+    cursor:
+        grabbing;
 }
-.red { color: #e74c3c; }
-.black { color: #2c3e50; }
+
+
+/*
+   IMPORTANT:
+   Dragging card ko hide nahi karna.
+   Original feel = sirf 50% opacity.
+*/
+
+.card.dragging,
+.hand-card.dragging {
+    opacity:
+        .5;
+}
+
+
+/* Agar JS direct opacity set kare */
+.card[draggable="true"],
+.hand-card[draggable="true"] {
+    -webkit-user-drag:
+        element;
+}
+
+
+/* =========================================================
+   CARD COLORS
+   ========================================================= */
+
+.red {
+    color:
+        #e74c3c;
+}
+
+.black {
+    color:
+        #2c3e50;
+}
+
+.hand-card.red {
+    color:
+        #d63031;
+}
+
+.hand-card.black {
+    color:
+        #171717;
+}
+
+
+/* =========================================================
+   REMOVE FANCY HAND GROUP UI
+   ========================================================= */
+
+.hand-suit-group {
+    display:
+        contents;
+}
+
+.suit-label {
+    display:
+        none;
+}
+
+
+/* =========================================================
+   IF NEW JS USES CARD-RANK / CARD-SUIT
+   Keep them simple.
+   ========================================================= */
+
+.card-rank {
+    line-height:
+        1;
+}
+
+.card-suit {
+    line-height:
+        1;
+}
+
+
+/* =========================================================
+   SLOT CARDS
+   EXACT SAME SIZE AS NORMAL CARDS
+   ========================================================= */
+
+.slot .card,
+.slot .hand-card {
+    width:
+        45px !important;
+
+    height:
+        65px !important;
+
+    min-width:
+        45px !important;
+
+    min-height:
+        65px !important;
+
+    max-width:
+        45px !important;
+
+    max-height:
+        65px !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+    font-size:
+        1.2rem !important;
+
+    transform:
+        none !important;
+
+    transition:
+        none !important;
+}
+
+
+/* =========================================================
+   DEALING ANIMATION
+   KEEP ONLY THE DEAL ANIMATION
+   ========================================================= */
+
+.card.dealing,
+.hand-card.dealing {
+    animation:
+        cardDealIn
+        .42s
+        cubic-bezier(.2,.8,.3,1)
+        both;
+}
+
+@keyframes cardDealIn {
+
+    0% {
+        opacity:
+            0;
+
+        transform:
+            translateY(-110px)
+            scale(.45)
+            rotate(-18deg);
+    }
+
+    65% {
+        opacity:
+            1;
+
+        transform:
+            translateY(8px)
+            scale(1.05)
+            rotate(3deg);
+    }
+
+    100% {
+        opacity:
+            1;
+
+        transform:
+            translateY(0)
+            scale(1)
+            rotate(0deg);
+    }
+}
+
+
+/* =========================================================
+   LOCK BUTTON
+   ========================================================= */
 
 #lock-btn {
-    padding: 10px 20px;
-    font-size: 1.2rem;
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 20px;
+    padding:
+        13px 28px;
+
+    font-size:
+        1.1rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .5px;
+
+    background:
+        #27ae60;
+
+    color:
+        white;
+
+    border:
+        none;
+
+    border-radius:
+        14px;
+
+    cursor:
+        pointer;
+
+    margin-bottom:
+        20px;
+
+    box-shadow:
+        0 8px 20px
+        rgba(0,0,0,.25);
 }
+
 #lock-btn:disabled {
-    background-color: #7f8c8d;
-    cursor: not-allowed;
+    background:
+        #7f8c8d;
+
+    cursor:
+        not-allowed;
 }
 
-/* ============================
-   Floating Scoreboard & Battle Arena
-============================ */
+
+/* =========================================================
+   SCOREBOARD MODAL
+   ========================================================= */
+
 .modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); z-index: 1000;
+    position:
+        fixed;
+
+    top:
+        0;
+
+    left:
+        0;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    background:
+        rgba(0,0,0,.72);
+
+    z-index:
+        1000;
+
+    backdrop-filter:
+        blur(7px);
 }
+
 .modal-content {
-    background: #2c3e50; margin: 15% auto; padding: 20px;
-    width: 80%; max-width: 400px; border-radius: 10px; color: white;
-}
-#close-score { float: right; font-size: 28px; cursor: pointer; color: red; }
-#score-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-#score-table th, #score-table td { border: 1px solid #7f8c8d; padding: 10px; text-align: center; }
+    background:
+        linear-gradient(
+            145deg,
+            #102d24,
+            #071914
+        );
 
-#battle-arena {
-    position: fixed; top: 20%; left: 10%; width: 80%; background: rgba(0,0,0,0.9);
-    padding: 30px; border-radius: 15px; z-index: 500; color: gold; text-align: center;
-}
-.discard-anim {
-    transition: all 0.5s ease; transform: translateY(-200px) scale(0.5); opacity: 0;
+    margin:
+        15% auto;
+
+    padding:
+        24px;
+
+    width:
+        80%;
+
+    max-width:
+        400px;
+
+    border-radius:
+        18px;
+
+    color:
+        white;
+
+    border:
+        1px solid
+        rgba(255,255,255,.13);
+
+    box-shadow:
+        0 25px 80px
+        rgba(0,0,0,.55);
 }
 
-/* ============================
-   Mobile Responsive
-============================ */
-@media (max-width: 600px) {
-    .slot {
-        width: 100px; 
-        height: 90px;
-        gap: 3px;
-    }
-    .card {
-        width: 28px; 
-        height: 42px;
-        font-size: 0.8rem;
-    }
-    #player-hand {
-        padding: 10px;
-        gap: 5px;
-    }
-    
-    /* Virtual Table adjustments for mobile */
-    #virtual-table {
-        padding: 10px;
-        border-radius: 50px;
-    }
-    .avatar {
-        width: 45px;
-        height: 45px;
-        padding: 10px;
-        font-size: 0.8rem;
-    }
-}
-/* History Panel Styles */
-.history-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
-.history-player { text-align: center; font-size: 1rem; background: white; color: black; padding: 8px; border-radius: 5px; flex: 1; margin: 0 5px; }
 
-/* ===== PACHISA PREMIUM UI ===== */
-body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,204,113,.18),transparent 35%),linear-gradient(135deg,#071e18,#0d2f24 45%,#071813)}
-#game-board{min-height:100vh;padding:20px 14px 40px;box-sizing:border-box;position:relative}
-.top-actions{position:absolute;top:14px;right:14px;display:flex;gap:8px;z-index:20}
-.top-btn{border:1px solid rgba(255,255,255,.18);color:#fff;padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 8px 25px rgba(0,0,0,.25)}
-.score-btn{background:linear-gradient(135deg,#f39c12,#e67e22)}.history-btn{background:linear-gradient(135deg,#8e44ad,#6c3483)}
-#room-info{display:inline-block;margin:4px auto 12px;padding:9px 16px;border-radius:999px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);color:#ffe082}
-.live-scoreboard{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:8px auto 16px;max-width:720px}
-.live-score-player{min-width:105px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;gap:14px;font-size:.85rem;box-shadow:0 6px 18px rgba(0,0,0,.18)}
-.live-score-player strong{color:#ffd166}
-#virtual-table{background:radial-gradient(circle at center,#199b5b 0%,#087a45 58%,#075b36 100%);border:7px solid #6b3e1e;outline:2px solid rgba(255,215,130,.35);border-radius:140px;max-width:760px;min-height:145px;position:relative;box-shadow:inset 0 0 35px rgba(0,0,0,.45),0 18px 45px rgba(0,0,0,.3)}
-.avatar{display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2);box-shadow:0 7px 18px rgba(0,0,0,.35);overflow:hidden;word-break:break-word}
-#center-table{padding:8px;border-radius:18px;background:rgba(0,0,0,.16)}
-#deck-visual,#unusable-pile{border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
-#slots-area{max-width:950px;margin:22px auto;gap:10px}
-.slot{position:relative;width:165px;min-height:125px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(0,0,0,.14));border:2px dashed rgba(255,255,255,.28);box-shadow:inset 0 0 18px rgba(0,0,0,.15);transition:.2s}
-.slot:hover{border-color:#ffd166;transform:translateY(-2px)}
-.card{border-radius:8px;border:1px solid #ddd;box-shadow:0 5px 12px rgba(0,0,0,.28);transition:transform .15s,box-shadow .15s}.card:hover{transform:translateY(-6px);box-shadow:0 10px 18px rgba(0,0,0,.4)}
-#player-hand{max-width:950px;margin:0 auto;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 0 25px rgba(0,0,0,.22)}
-#lock-btn{border-radius:14px;padding:13px 28px;font-weight:900;letter-spacing:.5px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
-.modal{backdrop-filter:blur(7px);background:rgba(0,0,0,.72)}
-.scoreboard-card{background:radial-gradient(circle at top right,rgba(241,196,15,.12),transparent 35%),linear-gradient(145deg,#102d24,#071914);border:1px solid rgba(255,255,255,.13);box-shadow:0 25px 80px rgba(0,0,0,.55);padding:24px;position:relative}
-.modal-close{float:right;border:0;background:rgba(255,255,255,.08);color:#fff;width:38px;height:38px;border-radius:50%;font-size:25px;cursor:pointer}
-.scoreboard-heading{display:flex;align-items:center;gap:14px;margin-bottom:20px;text-align:left}.scoreboard-heading .trophy{font-size:42px}.scoreboard-heading h2{margin:0;color:#ffd166}.scoreboard-heading p{margin:3px 0 0;color:rgba(255,255,255,.62);font-size:.85rem}
-#score-table{border-collapse:separate;border-spacing:0 8px}#score-table th{color:rgba(255,255,255,.5);font-size:.72rem;letter-spacing:1px;border:0}#score-table td{border:0;background:rgba(255,255,255,.06);padding:12px 10px}#score-table tr td:first-child{border-radius:12px 0 0 12px}#score-table tr td:last-child{border-radius:0 12px 12px 0}
-.score-player-name{text-align:left;font-weight:800}.player-dot{width:8px;height:8px;background:#2ecc71;display:inline-block;border-radius:50%;margin-right:7px;box-shadow:0 0 10px #2ecc71}.score-points{color:#ffd166;font-weight:900;font-size:1.2rem}.score-points small{color:rgba(255,255,255,.45);font-size:.7rem;margin-left:2px}.score-leader td{background:linear-gradient(90deg,rgba(241,196,15,.16),rgba(255,255,255,.06))!important}
-.leader-badge{font-size:.55rem;background:#f1c40f;color:#1d1d1d;padding:3px 5px;border-radius:5px;margin-left:5px}.mini-progress{width:95%;height:4px;margin-top:6px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden}.mini-progress span{display:block;height:100%;background:linear-gradient(90deg,#2ecc71,#f1c40f);border-radius:inherit;transition:width .35s}
-#battle-arena{background:radial-gradient(circle at center,rgba(27,94,61,.95),rgba(0,0,0,.97));border:1px solid rgba(255,215,130,.25);box-shadow:0 25px 70px rgba(0,0,0,.6)}
-@media(max-width:600px){.top-actions{position:relative;top:auto;right:auto;justify-content:center;margin-bottom:10px}.top-btn{flex:1;padding:9px 8px;font-size:.78rem}#virtual-table{width:94%;min-height:125px;border-width:5px}#slots-area{gap:6px}.slot{width:105px;min-height:92px}.live-score-player{min-width:90px;font-size:.75rem}.scoreboard-card{width:88%;margin:25% auto;padding:18px}}
-/* ==========================================
-   PREVIOUS ROUND - SCROLL FIX
-   ========================================== */
+/* =========================================================
+   SCOREBOARD
+   ========================================================= */
+
+#close-score {
+    float:
+        right;
+
+    font-size:
+        28px;
+
+    cursor:
+        pointer;
+
+    color:
+        red;
+}
+
+#score-table {
+    width:
+        100%;
+
+    border-collapse:
+        separate;
+
+    border-spacing:
+        0 8px;
+
+    margin-top:
+        15px;
+}
+
+#score-table th {
+    color:
+        rgba(255,255,255,.5);
+
+    font-size:
+        .72rem;
+
+    letter-spacing:
+        1px;
+
+    border:
+        0;
+}
+
+#score-table td {
+    border:
+        0;
+
+    background:
+        rgba(255,255,255,.06);
+
+    padding:
+        12px 10px;
+
+    text-align:
+        center;
+}
+
+#score-table tr td:first-child {
+    border-radius:
+        12px 0 0 12px;
+}
+
+#score-table tr td:last-child {
+    border-radius:
+        0 12px 12px 0;
+}
+
+.score-player-name {
+    text-align:
+        left;
+
+    font-weight:
+        800;
+}
+
+.player-dot {
+    width:
+        8px;
+
+    height:
+        8px;
+
+    background:
+        #2ecc71;
+
+    display:
+        inline-block;
+
+    border-radius:
+        50%;
+
+    margin-right:
+        7px;
+
+    box-shadow:
+        0 0 10px
+        #2ecc71;
+}
+
+.score-points {
+    color:
+        #ffd166;
+
+    font-weight:
+        900;
+
+    font-size:
+        1.2rem;
+}
+
+.score-points small {
+    color:
+        rgba(255,255,255,.45);
+
+    font-size:
+        .7rem;
+
+    margin-left:
+        2px;
+}
+
+.score-leader td {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(241,196,15,.16),
+            rgba(255,255,255,.06)
+        ) !important;
+}
+
+.leader-badge {
+    font-size:
+        .55rem;
+
+    background:
+        #f1c40f;
+
+    color:
+        #1d1d1d;
+
+    padding:
+        3px 5px;
+
+    border-radius:
+        5px;
+
+    margin-left:
+        5px;
+}
+
+.mini-progress {
+    width:
+        95%;
+
+    height:
+        4px;
+
+    margin-top:
+        6px;
+
+    background:
+        rgba(255,255,255,.08);
+
+    border-radius:
+        10px;
+
+    overflow:
+        hidden;
+}
+
+.mini-progress span {
+    display:
+        block;
+
+    height:
+        100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2ecc71,
+            #f1c40f
+        );
+
+    border-radius:
+        inherit;
+
+    transition:
+        width .35s;
+}
+
+
+/* =========================================================
+   PREVIOUS ROUND MODAL
+   ========================================================= */
 
 #history-modal {
-    overflow-y: auto;
-    padding: 20px 0;
-    box-sizing: border-box;
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        10000;
+
+    overflow-y:
+        auto;
+
+    overflow-x:
+        hidden;
+
+    padding:
+        20px 0;
+
+    box-sizing:
+        border-box;
+
+    -webkit-overflow-scrolling:
+        touch;
 }
 
-
 #history-modal .modal-content {
+    position:
+        relative;
 
-    width: min(92%, 850px);
+    width:
+        min(92vw, 900px);
 
-    max-width: 850px;
+    max-width:
+        900px;
 
-    max-height: 82vh;
+    min-height:
+        200px;
 
-    margin: 5vh auto;
+    max-height:
+        calc(100vh - 50px);
 
-    overflow-y: auto;
+    margin:
+        20px auto;
 
-    overflow-x: hidden;
+    box-sizing:
+        border-box;
 
-    box-sizing: border-box;
+    overflow-y:
+        auto;
 
-    padding: 22px;
+    overflow-x:
+        hidden;
 
-    border-radius: 18px;
+    padding:
+        20px;
+
+    border-radius:
+        20px;
 
     background:
         linear-gradient(
@@ -262,33 +1187,38 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
     box-shadow:
         0 25px 80px
         rgba(0,0,0,.6);
-
 }
 
 
-/* Scrollbar */
+/* History scrollbar */
 
 #history-modal .modal-content::-webkit-scrollbar {
-    width: 7px;
+    width:
+        7px;
 }
 
 #history-modal .modal-content::-webkit-scrollbar-track {
-    background: rgba(255,255,255,.05);
-    border-radius: 10px;
+    background:
+        rgba(255,255,255,.04);
+
+    border-radius:
+        10px;
 }
 
 #history-modal .modal-content::-webkit-scrollbar-thumb {
-    background: rgba(241,196,15,.65);
-    border-radius: 10px;
+    background:
+        rgba(241,196,15,.55);
+
+    border-radius:
+        10px;
 }
 
 
-/* ==========================================
-   HISTORY ROUND
-   ========================================== */
+/* =========================================================
+   HISTORY CONTENT
+   ========================================================= */
 
 .history-battle-round {
-
     background:
         rgba(255,255,255,.055);
 
@@ -296,715 +1226,314 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
         1px solid
         rgba(255,255,255,.10);
 
-    border-radius: 14px;
+    border-radius:
+        14px;
 
-    padding: 14px;
+    padding:
+        14px;
 
-    margin-bottom: 14px;
-
+    margin-bottom:
+        14px;
 }
 
-
 .history-round-header {
+    display:
+        flex;
 
-    display: flex;
+    justify-content:
+        space-between;
 
-    justify-content: space-between;
+    align-items:
+        center;
 
-    align-items: center;
+    padding-bottom:
+        10px;
 
-    padding-bottom: 10px;
-
-    margin-bottom: 10px;
+    margin-bottom:
+        10px;
 
     border-bottom:
         1px solid
         rgba(255,255,255,.08);
-
 }
-
 
 .history-round-header strong {
+    color:
+        #ffd166;
 
-    color: #ffd166;
-
-    font-size: 1rem;
-
+    font-size:
+        1rem;
 }
-
 
 .history-round-header span {
+    color:
+        #2ecc71;
 
-    color: #2ecc71;
-
-    font-weight: 800;
-
+    font-weight:
+        800;
 }
-
 
 .history-row {
+    display:
+        flex;
 
-    display: flex;
+    gap:
+        10px;
 
-    gap: 10px;
-
-    width: 100%;
-
+    width:
+        100%;
 }
-
 
 .history-player {
+    flex:
+        1;
 
-    flex: 1;
+    min-width:
+        0;
 
-    min-width: 0;
+    text-align:
+        center;
 
-    text-align: center;
+    background:
+        white;
 
-    background: white;
+    color:
+        #111;
 
-    color: #111;
+    padding:
+        10px 6px;
 
-    padding: 10px 6px;
+    border-radius:
+        10px;
 
-    border-radius: 10px;
-
-    font-size: .9rem;
-
+    font-size:
+        .9rem;
 }
-
 
 .history-player strong {
+    display:
+        block;
 
-    display: block;
-
-    margin-bottom: 5px;
-
+    margin-bottom:
+        5px;
 }
 
 
-@media (max-width: 600px) {
-
-    #history-modal {
-        padding: 10px 0;
-    }
-
-
-    #history-modal .modal-content {
-
-        width: 94%;
-
-        max-height: 86vh;
-
-        margin: 4vh auto;
-
-        padding: 14px;
-
-    }
-
-
-    .history-row {
-
-        flex-direction: column;
-
-    }
-
-
-    .history-player {
-
-        width: 100%;
-
-        box-sizing: border-box;
-
-    }
-
-}
-
-
-/* ==========================================
-   MANUAL BATTLE ARENA
-   ========================================== */
-
-#battle-arena {
-
-    position: fixed;
-
-    top: 5%;
-
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    width: min(92%, 850px);
-
-    max-height: 90vh;
-
-    overflow-y: auto;
-
-    box-sizing: border-box;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    z-index: 500;
-
-    background:
-        radial-gradient(
-            circle at top,
-            rgba(27,94,61,.98),
-            rgba(0,0,0,.98)
-        );
-
-    border:
-        1px solid
-        rgba(255,215,130,.25);
-
-    box-shadow:
-        0 25px 80px
-        rgba(0,0,0,.75);
-
-}
-
-
-.battle-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    margin-bottom: 20px;
-
-}
-
-
-.battle-small-title {
-
-    font-size: .7rem;
-
-    color: rgba(255,255,255,.5);
-
-    letter-spacing: 2px;
-
-}
-
-
-#battle-title {
-
-    margin: 4px 0 0;
-
-    color: #ffd166;
-
-    font-size: 1.8rem;
-
-}
-
-
-.battle-step {
-
-    display: flex;
-
-    align-items: baseline;
-
-    gap: 3px;
-
-    background:
-        rgba(255,255,255,.08);
-
-    padding: 8px 13px;
-
-    border-radius: 12px;
-
-    color: #ffd166;
-
-}
-
-
-.battle-step span {
-
-    font-size: 1.5rem;
-
-    font-weight: 900;
-
-}
-
-
-.battle-step small {
-
-    color:
-        rgba(255,255,255,.5);
-
-}
-
-
-/* ==========================================
-   PLAYER BATTLE CARD
-   ========================================== */
-
-#battle-cards {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 14px;
-
-    margin: 15px 0;
-
-}
-
-
-.battle-player-card {
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.12),
-            rgba(0,0,0,.25)
-        );
-
-    border:
-        1px solid
-        rgba(255,255,255,.14);
-
-    border-radius: 16px;
-
-    padding: 14px 10px;
-
-    box-shadow:
-        0 8px 25px
-        rgba(0,0,0,.3);
-
-}
-
-
-.battle-player-name {
-
-    font-weight: 900;
-
-    color: #fff;
-
-    margin-bottom: 12px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-.battle-playing-cards {
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 5px;
-
-}
-
-
-.battle-single-card {
-
-    width: 58px;
-
-    height: 82px;
-
-    background: #fff;
-
-    border-radius: 8px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 1.5rem;
-
-    font-weight: 900;
-
-    box-shadow:
-        0 5px 12px
-        rgba(0,0,0,.35);
-
-}
-
-
-.battle-single-card span {
-
-    font-size: 1.15rem;
-
-}
-
-
-.battle-combination {
-
-    margin-top: 10px;
-
-    font-size: .75rem;
-
-    color:
-        rgba(255,255,255,.55);
-
-}
-
-
-/* ==========================================
-   WINNER
-   ========================================== */
-
-#battle-winner {
-
-    margin: 18px 0;
-
-}
-
-
-.battle-result {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 10px 18px;
-
-    border-radius: 999px;
-
-    background:
-        rgba(241,196,15,.12);
-
-    border:
-        1px solid
-        rgba(241,196,15,.3);
-
-    color: #fff;
-
-}
-
-
-.battle-result strong {
-
-    color: #ffd166;
-
-}
-
-
-.battle-result span {
-
-    color: #2ecc71;
-
-    font-weight: 900;
-
-}
-
-
-/* ==========================================
-   NEXT BUTTON
-   ========================================== */
-
-.battle-next-btn {
-
-    width: 100%;
-
-    max-width: 400px;
-
-    padding: 14px 20px;
-
-    border: none;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f1c40f,
-            #e67e22
-        );
-
-    color: #171717;
-
-    font-size: 1rem;
-
-    font-weight: 900;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 8px 25px
-        rgba(0,0,0,.3);
-
-    transition:
-        transform .15s,
-        box-shadow .15s;
-
-}
-
-
-.battle-next-btn:hover {
-
-    transform:
-        translateY(-2px);
-
-    box-shadow:
-        0 12px 30px
-        rgba(0,0,0,.4);
-
-}
-
-
-.battle-next-btn:active {
-
-    transform:
-        scale(.98);
-
-}
-
-
-@media (max-width: 700px) {
-
-    #battle-arena {
-
-        top: 2%;
-
-        max-height: 94vh;
-
-        padding: 15px;
-
-    }
-
-
-    #battle-cards {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .battle-player-card {
-
-        padding: 12px;
-
-    }
-
-
-    .battle-single-card {
-
-        width: 55px;
-
-        height: 76px;
-
-    }
-
-}
 /* =========================================================
-   PACHISA FINAL BATTLE + CARD UI
+   BATTLE ARENA
    ========================================================= */
 
-/* ---------------------------------------------------------
-   BATTLE POPUP
-   --------------------------------------------------------- */
-
 #battle-arena {
+    position:
+        fixed;
 
-    position: fixed;
+    top:
+        3vh;
 
-    top: 3vh;
-    left: 50%;
+    left:
+        50%;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
-    width: min(94vw, 900px);
+    width:
+        min(94vw, 900px);
 
-    height: 90vh;
+    height:
+        90vh;
 
-    max-height: 90vh;
+    max-height:
+        90vh;
 
-    box-sizing: border-box;
+    box-sizing:
+        border-box;
 
-    z-index: 9999;
+    z-index:
+        9999;
 
-    display: flex;
+    display:
+        flex;
 
-    flex-direction: column;
+    flex-direction:
+        column;
 
-    overflow: hidden;
+    overflow:
+        hidden;
 
-    padding: 18px;
+    padding:
+        18px;
 
-    border-radius: 22px;
+    border-radius:
+        22px;
 
     background:
         radial-gradient(
             circle at top,
-            rgba(31, 112, 72, .98),
-            rgba(3, 20, 14, .99)
+            rgba(31,112,72,.98),
+            rgba(3,20,14,.99)
         );
 
     border:
         1px solid
-        rgba(255, 215, 130, .28);
+        rgba(255,215,130,.28);
 
     box-shadow:
         0 30px 100px
         rgba(0,0,0,.8);
 
+    color:
+        gold;
 }
 
 
-/* Header never scrolls */
+/* =========================================================
+   BATTLE HEADER
+   ========================================================= */
 
 #battle-arena .battle-header {
+    flex-shrink:
+        0;
 
-    flex-shrink: 0;
+    display:
+        flex;
 
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        20px;
+}
+
+.battle-small-title {
+    font-size:
+        .7rem;
+
+    color:
+        rgba(255,255,255,.5);
+
+    letter-spacing:
+        2px;
+}
+
+#battle-title {
+    margin:
+        4px 0 0;
+
+    color:
+        #ffd166;
+
+    font-size:
+        1.8rem;
+}
+
+.battle-step {
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    gap:
+        3px;
+
+    background:
+        rgba(255,255,255,.08);
+
+    padding:
+        8px 13px;
+
+    border-radius:
+        12px;
+
+    color:
+        #ffd166;
+}
+
+.battle-step span {
+    font-size:
+        1.5rem;
+
+    font-weight:
+        900;
+}
+
+.battle-step small {
+    color:
+        rgba(255,255,255,.5);
 }
 
 
-/* Cards area becomes scrollable */
+/* =========================================================
+   BATTLE CARDS AREA
+   ========================================================= */
 
 #battle-cards {
+    flex:
+        1;
 
-    flex: 1;
+    min-height:
+        0;
 
-    min-height: 0;
+    overflow-y:
+        auto;
 
-    overflow-y: auto;
+    overflow-x:
+        hidden;
 
-    overflow-x: hidden;
+    padding:
+        8px 6px 18px;
 
-    padding: 8px 6px 18px;
+    margin:
+        8px 0;
 
-    margin: 8px 0;
+    display:
+        grid;
 
-    -webkit-overflow-scrolling: touch;
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
 
+    gap:
+        14px;
+
+    -webkit-overflow-scrolling:
+        touch;
 }
 
-
-/* Scrollbar */
-
 #battle-cards::-webkit-scrollbar {
-
-    width: 7px;
-
+    width:
+        7px;
 }
 
 #battle-cards::-webkit-scrollbar-track {
-
     background:
         rgba(255,255,255,.04);
 
-    border-radius: 10px;
-
+    border-radius:
+        10px;
 }
 
 #battle-cards::-webkit-scrollbar-thumb {
-
     background:
         rgba(241,196,15,.55);
 
-    border-radius: 10px;
-
+    border-radius:
+        10px;
 }
 
 
-/* Winner stays visible */
-
-#battle-winner {
-
-    flex-shrink: 0;
-
-    text-align: center;
-
-    margin: 8px 0;
-
-}
-
-
-/* NEXT BUTTON ALWAYS VISIBLE */
-
-#battle-next-btn {
-
-    flex-shrink: 0;
-
-    position: relative;
-
-    z-index: 10;
-
-    width: 100%;
-
-    max-width: 430px;
-
-    margin: 8px auto 0;
-
-    padding: 15px 20px;
-
-    border: none;
-
-    border-radius: 15px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f1c40f,
-            #e67e22
-        );
-
-    color: #161616;
-
-    font-size: 1rem;
-
-    font-weight: 900;
-
-    letter-spacing: .4px;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 8px 25px
-        rgba(0,0,0,.4);
-
-}
-
-
-#battle-next-btn:active {
-
-    transform: scale(.97);
-
-}
-
-
-/* ---------------------------------------------------------
-   BATTLE PLAYER CARDS
-   --------------------------------------------------------- */
-
-#battle-cards {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
-    gap: 14px;
-
-}
-
+/* =========================================================
+   BATTLE PLAYER CARD
+   ========================================================= */
 
 .battle-player-card {
+    padding:
+        14px 10px;
 
-    padding: 14px 10px;
-
-    border-radius: 17px;
+    border-radius:
+        17px;
 
     background:
         linear-gradient(
@@ -1020,868 +1549,670 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
     box-shadow:
         0 8px 25px
         rgba(0,0,0,.35);
+}
 
+.battle-player-name {
+    font-weight:
+        900;
+
+    color:
+        #fff;
+
+    margin-bottom:
+        12px;
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
 }
 
 
-/* ---------------------------------------------------------
-   FANCY PLAYING CARDS
-   --------------------------------------------------------- */
+/* =========================================================
+   BATTLE PLAYING CARDS
+   ========================================================= */
 
 .battle-playing-cards {
+    display:
+        flex;
 
-    display: flex;
+    justify-content:
+        center;
 
-    justify-content: center;
+    gap:
+        4px;
 
-    gap: 4px;
-
-    perspective: 800px;
-
+    perspective:
+        800px;
 }
 
-
 .battle-single-card {
+    position:
+        relative;
 
-    position: relative;
+    width:
+        62px;
 
-    width: 62px;
+    height:
+        88px;
 
-    height: 88px;
+    flex-shrink:
+        0;
 
-    flex-shrink: 0;
+    display:
+        flex;
 
-    display: flex;
+    flex-direction:
+        column;
 
-    flex-direction: column;
+    justify-content:
+        center;
 
-    justify-content: center;
-
-    align-items: center;
+    align-items:
+        center;
 
     background:
         linear-gradient(
             145deg,
-            #ffffff,
-            #eeeeee
+            #fff,
+            #eee
         );
 
-    border-radius: 10px;
+    border-radius:
+        10px;
 
     border:
         1px solid
         rgba(0,0,0,.12);
 
-    color: #171717;
+    color:
+        #171717;
 
-    font-size: 1.55rem;
+    font-size:
+        1.55rem;
 
-    font-weight: 900;
+    font-weight:
+        900;
 
     box-shadow:
         0 7px 15px
         rgba(0,0,0,.35);
-
-    transform:
-        rotateX(0deg)
-        rotateY(0deg);
-
-    transition:
-        transform .2s ease,
-        box-shadow .2s ease;
-
 }
-
-
-.battle-single-card:hover {
-
-    transform:
-        translateY(-5px)
-        rotate(-2deg);
-
-    box-shadow:
-        0 12px 22px
-        rgba(0,0,0,.45);
-
-}
-
 
 .battle-single-card span {
+    font-size:
+        1.2rem;
+}
 
-    font-size: 1.2rem;
+.battle-combination {
+    margin-top:
+        10px;
 
+    font-size:
+        .75rem;
+
+    color:
+        rgba(255,255,255,.55);
 }
 
 
-/* ---------------------------------------------------------
-   MAIN PLAYER HAND
-   --------------------------------------------------------- */
-
-#player-hand {
-
-    position: relative;
-
-    min-height: 135px;
-
-    padding: 18px 10px;
-
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.075),
-            rgba(0,0,0,.20)
-        );
-
-    border:
-        1px solid
-        rgba(255,255,255,.10);
-
-}
-
-
-/* Card grouping */
-
-.hand-suit-group {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    padding: 5px 9px;
-
-    margin: 5px 3px;
-
-    border-radius: 12px;
-
-    background:
-        rgba(255,255,255,.035);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-}
-
-
-/* Suit label */
-
-.suit-label {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    min-width: 25px;
-
-    height: 25px;
-
-    margin-right: 3px;
-
-    border-radius: 7px;
-
-    background:
-        rgba(255,255,255,.08);
-
-    font-size: .9rem;
-
-}
-
-
-/* ---------------------------------------------------------
-   FANCY PLAYER HAND CARD
-   --------------------------------------------------------- */
-
-.hand-card {
-
-    position: relative;
-
-    width: 54px;
-
-    height: 78px;
-
-    margin: 4px;
-
-    display: inline-flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-
-    background:
-        linear-gradient(
-            145deg,
-            #ffffff,
-            #f1f1f1
-        );
-
-    border-radius: 9px;
-
-    border:
-        1px solid
-        rgba(0,0,0,.14);
-
-    color: #111;
-
-    font-size: 1.25rem;
-
-    font-weight: 900;
-
-    cursor: grab;
-
-    box-shadow:
-        0 5px 12px
-        rgba(0,0,0,.35);
-
-    opacity: 1;
-
-    transform:
-        translateY(0)
-        rotate(0deg);
-
-    transition:
-        transform .18s ease,
-        box-shadow .18s ease;
-
-}
-
-
-.hand-card:hover {
-
-    transform:
-        translateY(-8px)
-        rotate(-2deg);
-
-    box-shadow:
-        0 12px 22px
-        rgba(0,0,0,.4);
-
-}
-
-
-.hand-card:active {
-
-    cursor: grabbing;
-
-}
-
-
-/* Flying card animation */
-
-.hand-card.dealing {
-
-    animation:
-        cardDealIn
-        .42s
-        cubic-bezier(.2,.8,.3,1)
-        both;
-
-}
-
-
-@keyframes cardDealIn {
-
-    0% {
-
-        opacity: 0;
-
-        transform:
-            translate(
-                0,
-                -110px
-            )
-            scale(.45)
-            rotate(
-                -18deg
-            );
-
-    }
-
-    65% {
-
-        opacity: 1;
-
-        transform:
-            translate(
-                0,
-                8px
-            )
-            scale(1.05)
-            rotate(
-                3deg
-            );
-
-    }
-
-    100% {
-
-        opacity: 1;
-
-        transform:
-            translate(
-                0,
-                0
-            )
-            scale(1)
-            rotate(0deg);
-
-    }
-
-}
-
-
-/* ---------------------------------------------------------
-   SUIT COLORS
-   --------------------------------------------------------- */
-
-.hand-card.red {
-
-    color: #d63031;
-
-}
-
-.hand-card.black {
-
-    color: #171717;
-
-}
-
-
-/* ---------------------------------------------------------
-   PREVIOUS ROUND MODAL
-   --------------------------------------------------------- */
-
-#history-modal {
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 10000;
-
-    overflow-y: auto;
-
-    overflow-x: hidden;
-
-    padding:
-        20px 0;
-
-    box-sizing: border-box;
-
-    -webkit-overflow-scrolling:
-        touch;
-
-}
-
-
-/* Modal content */
-
-#history-modal .modal-content {
-
-    position: relative;
-
-    width: min(92vw, 900px);
-
-    max-width: 900px;
-
-    min-height: 200px;
-
-    max-height:
-        calc(100vh - 50px);
+/* =========================================================
+   BATTLE WINNER
+   ========================================================= */
+
+#battle-winner {
+    flex-shrink:
+        0;
+
+    text-align:
+        center;
 
     margin:
-        20px auto;
-
-    box-sizing: border-box;
-
-    overflow-y: auto;
-
-    overflow-x: hidden;
-
-    padding: 20px;
-
-    border-radius: 20px;
-
+        8px 0;
 }
 
+.battle-result {
+    display:
+        inline-flex;
 
-/* Modal internal scrollbar */
+    align-items:
+        center;
 
-#history-modal .modal-content::-webkit-scrollbar {
+    gap:
+        8px;
 
-    width: 7px;
+    padding:
+        10px 18px;
 
-}
-
-#history-modal .modal-content::-webkit-scrollbar-track {
+    border-radius:
+        999px;
 
     background:
-        rgba(255,255,255,.04);
+        rgba(241,196,15,.12);
 
+    border:
+        1px solid
+        rgba(241,196,15,.3);
+
+    color:
+        #fff;
 }
 
-#history-modal .modal-content::-webkit-scrollbar-thumb {
+.battle-result strong {
+    color:
+        #ffd166;
+}
+
+.battle-result span {
+    color:
+        #2ecc71;
+
+    font-weight:
+        900;
+}
+
+
+/* =========================================================
+   NEXT BUTTON
+   ========================================================= */
+
+#battle-next-btn,
+.battle-next-btn {
+    flex-shrink:
+        0;
+
+    position:
+        relative;
+
+    z-index:
+        10;
+
+    width:
+        100%;
+
+    max-width:
+        430px;
+
+    margin:
+        8px auto 0;
+
+    padding:
+        15px 20px;
+
+    border:
+        none;
+
+    border-radius:
+        15px;
 
     background:
-        rgba(241,196,15,.55);
+        linear-gradient(
+            135deg,
+            #f1c40f,
+            #e67e22
+        );
 
-    border-radius: 10px;
+    color:
+        #161616;
 
+    font-size:
+        1rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .4px;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,0,0,.4);
+}
+
+#battle-next-btn:active,
+.battle-next-btn:active {
+    transform:
+        scale(.97);
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
+   DISCARD ANIMATION
+   ========================================================= */
+
+.discard-anim {
+    transition:
+        all .5s ease;
+
+    transform:
+        translateY(-200px)
+        scale(.5);
+
+    opacity:
+        0;
+}
+
+
+/* =========================================================
    MOBILE
-   --------------------------------------------------------- */
+   ========================================================= */
 
 @media (max-width: 700px) {
 
+    #game-board {
+        padding:
+            14px 8px 30px;
+    }
+
+
+    /* TOP */
+
+    .top-actions {
+        position:
+            relative;
+
+        top:
+            auto;
+
+        right:
+            auto;
+
+        justify-content:
+            center;
+
+        margin-bottom:
+            10px;
+    }
+
+    .top-btn {
+        flex:
+            1;
+
+        padding:
+            9px 8px;
+
+        font-size:
+            .78rem;
+    }
+
+
+    /* TABLE */
+
+    #virtual-table {
+        width:
+            94%;
+
+        min-height:
+            125px;
+
+        padding:
+            10px;
+
+        border-width:
+            5px;
+
+        border-radius:
+            50px;
+    }
+
+
+    .avatar {
+        width:
+            45px;
+
+        height:
+            45px;
+
+        padding:
+            10px;
+
+        font-size:
+            .8rem;
+    }
+
+
+    /* CENTER */
+
+    #center-table {
+        gap:
+            6px;
+
+        padding:
+            5px;
+    }
+
+    #deck-visual,
+    #unusable-pile {
+        width:
+            38px;
+
+        height:
+            55px;
+
+        font-size:
+            .65rem;
+    }
+
+
+    /* =====================================================
+       MOBILE PLAYER CARDS
+       ORIGINAL SMALL SIZE
+       ===================================================== */
+
+    #player-hand {
+        gap:
+            5px;
+
+        padding:
+            10px;
+
+        min-height:
+            120px;
+
+        overflow:
+            visible;
+    }
+
+
+    .card,
+    .hand-card {
+
+        width:
+            28px !important;
+
+        height:
+            42px !important;
+
+        min-width:
+            28px !important;
+
+        min-height:
+            42px !important;
+
+        max-width:
+            28px !important;
+
+        max-height:
+            42px !important;
+
+        margin:
+            0 !important;
+
+        font-size:
+            .8rem !important;
+
+        border-radius:
+            4px !important;
+
+        transform:
+            none !important;
+
+        transition:
+            none !important;
+    }
+
+
+    /* SLOT */
+
+    #slots-area {
+        gap:
+            6px;
+    }
+
+    .slot {
+        width:
+            100px;
+
+        height:
+            90px;
+
+        min-width:
+            100px;
+
+        min-height:
+            90px;
+
+        padding:
+            4px;
+
+        gap:
+            3px;
+    }
+
+
+    /* SLOT CARDS SAME SMALL SIZE */
+
+    .slot .card,
+    .slot .hand-card {
+
+        width:
+            28px !important;
+
+        height:
+            42px !important;
+
+        min-width:
+            28px !important;
+
+        min-height:
+            42px !important;
+
+        max-width:
+            28px !important;
+
+        max-height:
+            42px !important;
+
+        font-size:
+            .8rem !important;
+
+        margin:
+            0 !important;
+
+        transform:
+            none !important;
+    }
+
+
+    /* =====================================================
+       BATTLE
+       ===================================================== */
+
     #battle-arena {
+        top:
+            1.5vh;
 
-        top: 1.5vh;
+        width:
+            94vw;
 
-        width: 94vw;
+        height:
+            94vh;
 
-        height: 94vh;
+        max-height:
+            94vh;
 
-        max-height: 94vh;
+        padding:
+            12px;
 
-        padding: 12px;
-
-        border-radius: 18px;
-
+        border-radius:
+            18px;
     }
 
 
     #battle-cards {
+        grid-template-columns:
+            1fr;
 
-        grid-template-columns: 1fr;
-
-        gap: 10px;
-
+        gap:
+            10px;
     }
 
 
     .battle-player-card {
-
-        padding: 12px;
-
+        padding:
+            12px;
     }
 
 
     .battle-single-card {
+        width:
+            58px;
 
-        width: 58px;
-
-        height: 82px;
-
+        height:
+            82px;
     }
 
 
-    #battle-next-btn {
+    #battle-next-btn,
+    .battle-next-btn {
+        padding:
+            14px;
 
-        padding: 14px;
-
-        font-size: .95rem;
-
+        font-size:
+            .95rem;
     }
 
+
+    /* =====================================================
+       HISTORY
+       ===================================================== */
 
     #history-modal {
-
-        padding: 5px 0;
-
+        padding:
+            5px 0;
     }
 
 
     #history-modal .modal-content {
-
-        width: 94vw;
+        width:
+            94vw;
 
         max-height:
             calc(100vh - 20px);
 
-        margin: 10px auto;
-
-        padding: 14px;
-
-    }
-
-
-    .hand-card {
-
-        width: 48px;
-
-        height: 70px;
-
-        font-size: 1.1rem;
-
-    }
-
-}
-/* =========================================================
-   PACHISA COMPACT MOBILE CARD HAND
-   ========================================================= */
-
-/* Player hand ek hi horizontal sequence */
-#player-hand {
-
-    display: flex !important;
-
-    flex-direction: row !important;
-
-    flex-wrap: nowrap !important;
-
-    align-items: center !important;
-
-    justify-content: flex-start !important;
-
-    gap: 2px !important;
-
-    padding: 10px 5px !important;
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    min-height: 82px !important;
-
-    box-sizing: border-box !important;
-
-    overflow-x: auto !important;
-
-    overflow-y: hidden !important;
-
-    white-space: nowrap !important;
-
-    border-radius: 12px !important;
-
-}
-
-
-/* Scrollbar small */
-#player-hand::-webkit-scrollbar {
-
-    height: 4px;
-
-}
-
-#player-hand::-webkit-scrollbar-track {
-
-    background:
-        rgba(255,255,255,.04);
-
-}
-
-#player-hand::-webkit-scrollbar-thumb {
-
-    background:
-        rgba(255,255,255,.20);
-
-    border-radius: 10px;
-
-}
-
-
-/* =========================================================
-   REMOVE OLD SUIT GROUP SYSTEM
-   ========================================================= */
-
-.hand-suit-group {
-
-    display: contents !important;
-
-    margin: 0 !important;
-
-    padding: 0 !important;
-
-    border: 0 !important;
-
-    background: transparent !important;
-
-}
-
-
-.suit-label {
-
-    display: none !important;
-
-}
-
-
-/* =========================================================
-   SMALL PLAYING CARDS
-   ========================================================= */
-
-#player-hand .hand-card {
-
-    position: relative !important;
-
-    flex:
-        0 0 45px !important;
-
-    width: 45px !important;
-
-    min-width: 45px !important;
-
-    max-width: 45px !important;
-
-    height: 66px !important;
-
-    min-height: 66px !important;
-
-    max-height: 66px !important;
-
-    margin: 0 !important;
-
-    padding: 0 !important;
-
-    display: flex !important;
-
-    flex-direction: column !important;
-
-    align-items: center !important;
-
-    justify-content: center !important;
-
-    background:
-        linear-gradient(
-            145deg,
-            #ffffff,
-            #eeeeee
-        ) !important;
-
-    border:
-        1px solid
-        rgba(0,0,0,.18) !important;
-
-    border-radius: 6px !important;
-
-    box-sizing: border-box !important;
-
-    font-size: 1rem !important;
-
-    font-weight: 900 !important;
-
-    line-height: 1 !important;
-
-    cursor: grab !important;
-
-    white-space: normal !important;
-
-    box-shadow:
-        0 3px 7px
-        rgba(0,0,0,.30) !important;
-
-    transform:
-        translateY(0)
-        rotate(0deg);
-
-    transition:
-        transform .15s ease,
-        box-shadow .15s ease;
-
-}
-
-
-/* Rank */
-#player-hand .hand-card .card-rank {
-
-    font-size:
-        1.05rem;
-
-    line-height:
-        1;
-
-}
-
-
-/* Suit */
-#player-hand .hand-card .card-suit {
-
-    font-size:
-        .85rem;
-
-    line-height:
-        1;
-
-    margin-top:
-        3px;
-
-}
-
-
-/* Red cards */
-#player-hand .hand-card.red {
-
-    color:
-        #d63031 !important;
-
-}
-
-
-/* Black cards */
-#player-hand .hand-card.black {
-
-    color:
-        #151515 !important;
-
-}
-
-
-/* Hover */
-#player-hand .hand-card:hover {
-
-    transform:
-        translateY(-5px) !important;
-
-    z-index:
-        5;
-
-    box-shadow:
-        0 8px 15px
-        rgba(0,0,0,.40) !important;
-
-}
-
-
-/* Dragging */
-#player-hand .hand-card.dragging-card {
-
-    opacity:
-        .45 !important;
-
-    transform:
-        translateY(-8px)
-        scale(.95) !important;
-
-}
-
-
-/* =========================================================
-   DEAL ANIMATION
-   ========================================================= */
-
-#player-hand .hand-card.dealing {
-
-    animation:
-        pachisaDealCard
-        .38s
-        cubic-bezier(.2,.8,.3,1)
-        both;
-
-}
-
-
-@keyframes pachisaDealCard {
-
-    0% {
-
-        opacity: 0;
-
-        transform:
-            translateY(-90px)
-            scale(.55)
-            rotate(-12deg);
-
-    }
-
-    55% {
-
-        opacity: 1;
-
-        transform:
-            translateY(6px)
-            scale(1.05)
-            rotate(3deg);
-
-    }
-
-    100% {
-
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1)
-            rotate(0deg);
-
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 600px) {
-
-    #player-hand {
-
-        gap: 1px !important;
+        margin:
+            10px auto;
 
         padding:
-            8px 3px !important;
-
-        min-height:
-            76px !important;
-
+            14px;
     }
 
 
-    #player-hand .hand-card {
+    .history-row {
+        flex-direction:
+            column;
+    }
 
-        flex:
-            0 0 42px !important;
 
+    .history-player {
         width:
-            42px !important;
+            100%;
 
+        box-sizing:
+            border-box;
+    }
+
+
+    /* SCOREBOARD */
+
+    .scoreboard-card {
+        width:
+            88%;
+
+        margin:
+            25% auto;
+
+        padding:
+            18px;
+    }
+
+
+    .live-score-player {
         min-width:
-            42px !important;
-
-        max-width:
-            42px !important;
-
-        height:
-            62px !important;
-
-        min-height:
-            62px !important;
-
-        max-height:
-            62px !important;
-
-        border-radius:
-            5px !important;
-
-    }
-
-
-    #player-hand .hand-card .card-rank {
-
-        font-size:
-            .95rem;
-
-    }
-
-
-    #player-hand .hand-card .card-suit {
+            90px;
 
         font-size:
             .75rem;
+    }
+}
 
-        margin-top:
-            2px;
 
+/* =========================================================
+   EXTRA SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    #player-hand {
+        gap:
+            3px;
+
+        padding:
+            8px 5px;
     }
 
+    .card,
+    .hand-card {
+
+        width:
+            27px !important;
+
+        height:
+            41px !important;
+
+        min-width:
+            27px !important;
+
+        min-height:
+            41px !important;
+
+        max-width:
+            27px !important;
+
+        max-height:
+            41px !important;
+
+        font-size:
+            .75rem !important;
+    }
+
+    .slot {
+        width:
+            94px;
+
+        min-width:
+            94px;
+    }
+
+    .slot .card,
+    .slot .hand-card {
+
+        width:
+            27px !important;
+
+        height:
+            41px !important;
+
+        min-width:
+            27px !important;
+
+        min-height:
+            41px !important;
+
+        max-width:
+            27px !important;
+
+        max-height:
+            41px !important;
+
+        font-size:
+            .75rem !important;
+    }
 }
