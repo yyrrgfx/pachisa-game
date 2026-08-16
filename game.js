@@ -803,126 +803,323 @@ function getHandScore(cards) {
 // 9. RENDER PLAYER HAND
 // ==========================================
 
-function renderPlayerHand(
-    cardsArray
-) {
+// ==========================================
+// RENDER PLAYER HAND
+// ==========================================
+//
+// Cards:
+// 1. One-by-one deal animation
+// 2. Automatically grouped by suit
+// 3. Spades -> Hearts -> Diamonds -> Clubs
+//
+// ==========================================
+
+function renderPlayerHand(cardsArray) {
 
     playerHandDiv.innerHTML = "";
 
-
-    cardsArray.forEach(
-        (card, index) => {
-
-            const cardEl =
-                document.createElement(
-                    "div"
-                );
+    if (!cardsArray || !cardsArray.length) {
+        return;
+    }
 
 
-            cardEl.classList.add(
-                "card"
-            );
+    // ======================================
+    // SUIT ORDER
+    // ======================================
+
+    const suitOrder = [
+        "Spades",
+        "Hearts",
+        "Diamonds",
+        "Clubs"
+    ];
 
 
-            cardEl.classList.add(
+    // ======================================
+    // GROUP CARDS BY SUIT
+    // ======================================
 
-                (
-                    card.suit === "Hearts" ||
-                    card.suit === "Diamonds"
-                )
+    const groupedCards = {
 
-                    ? "red"
+        Spades: [],
+        Hearts: [],
+        Diamonds: [],
+        Clubs: []
 
-                    : "black"
-
-            );
-
-
-            const displayRank =
-                rankNames[card.rank] ||
-                card.rank;
+    };
 
 
-            cardEl.innerText =
-                `${displayRank}${suitSymbols[card.suit]}`;
+    cardsArray.forEach(card => {
 
+        if (
+            groupedCards[card.suit]
+        ) {
 
-            cardEl.dataset.suit =
-                card.suit;
-
-
-            cardEl.dataset.rank =
-                card.rank;
-
-
-            cardEl.dataset.id =
-                `card-${index}`;
-
-
-            cardEl.setAttribute(
-                "draggable",
-                "true"
-            );
-
-
-            cardEl.addEventListener(
-                "dragstart",
-                function () {
-
-                    draggedCard =
-                        this;
-
-                    setTimeout(
-                        () => {
-
-                            this.style.opacity =
-                                "0.5";
-
-                        },
-                        0
-                    );
-
-                }
-            );
-
-
-            cardEl.addEventListener(
-                "dragend",
-                function () {
-
-                    setTimeout(
-                        () => {
-
-                            this.style.opacity =
-                                "1";
-
-                        },
-                        0
-                    );
-
-
-                    draggedCard =
-                        null;
-
-
-                    validateSlots();
-
-                }
-            );
-
-
-            playerHandDiv.appendChild(
-                cardEl
+            groupedCards[card.suit].push(
+                card
             );
 
         }
-    );
 
+    });
+
+
+    // ======================================
+    // SORT EACH SUIT
+    // BIGGEST CARD FIRST
+    // ======================================
+
+    suitOrder.forEach(suit => {
+
+        groupedCards[suit].sort(
+            (a, b) =>
+                b.rank - a.rank
+        );
+
+    });
+
+
+    // ======================================
+    // CREATE SUIT GROUPS
+    // ======================================
+
+    let animationIndex = 0;
+
+
+    suitOrder.forEach(suit => {
+
+        const cards =
+            groupedCards[suit];
+
+
+        if (!cards.length) {
+            return;
+        }
+
+
+        // ==================================
+        // SUIT CONTAINER
+        // ==================================
+
+        const group =
+            document.createElement(
+                "div"
+            );
+
+
+        group.className =
+            "hand-suit-group";
+
+
+        group.dataset.suit =
+            suit;
+
+
+        // ==================================
+        // SUIT LABEL
+        // ==================================
+
+        const suitLabel =
+            document.createElement(
+                "div"
+            );
+
+
+        suitLabel.className =
+            "suit-label";
+
+
+        suitLabel.innerText =
+            suitSymbols[suit];
+
+
+        if (
+            suit === "Hearts" ||
+            suit === "Diamonds"
+        ) {
+
+            suitLabel.style.color =
+                "#e74c3c";
+
+        }
+
+        else {
+
+            suitLabel.style.color =
+                "#111";
+
+        }
+
+
+        group.appendChild(
+            suitLabel
+        );
+
+
+        // ==================================
+        // CARDS
+        // ==================================
+
+        cards.forEach(
+            (card, cardIndex) => {
+
+                const cardEl =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                cardEl.classList.add(
+                    "card",
+                    "hand-card",
+                    "dealing"
+                );
+
+
+                if (
+                    card.suit === "Hearts" ||
+                    card.suit === "Diamonds"
+                ) {
+
+                    cardEl.classList.add(
+                        "red"
+                    );
+
+                }
+
+                else {
+
+                    cardEl.classList.add(
+                        "black"
+                    );
+
+                }
+
+
+                const displayRank =
+                    rankNames[card.rank] ||
+                    card.rank;
+
+
+                cardEl.innerHTML = `
+
+                    <div>
+                        ${displayRank}
+                    </div>
+
+                    <div>
+                        ${suitSymbols[card.suit]}
+                    </div>
+
+                `;
+
+
+                cardEl.dataset.suit =
+                    card.suit;
+
+
+                cardEl.dataset.rank =
+                    card.rank;
+
+
+                cardEl.dataset.id =
+                    `card-${animationIndex}`;
+
+
+                cardEl.setAttribute(
+                    "draggable",
+                    "true"
+                );
+
+
+                // ==================================
+                // DEAL DELAY
+                // ==================================
+
+                cardEl.style.animationDelay =
+                    `${animationIndex * 90}ms`;
+
+
+                // ==================================
+                // DRAG START
+                // ==================================
+
+                cardEl.addEventListener(
+                    "dragstart",
+                    function () {
+
+                        draggedCard =
+                            this;
+
+
+                        setTimeout(
+                            () => {
+
+                                this.style.opacity =
+                                    "0.5";
+
+                            },
+                            0
+                        );
+
+                    }
+                );
+
+
+                // ==================================
+                // DRAG END
+                // ==================================
+
+                cardEl.addEventListener(
+                    "dragend",
+                    function () {
+
+                        this.style.opacity =
+                            "1";
+
+
+                        draggedCard =
+                            null;
+
+
+                        validateSlots();
+
+                    }
+                );
+
+
+                group.appendChild(
+                    cardEl
+                );
+
+
+                animationIndex++;
+
+            }
+        );
+
+
+        playerHandDiv.appendChild(
+            group
+        );
+
+    });
+
+
+    // ======================================
+    // SETUP DRAG & DROP
+    // ======================================
 
     setupDragAndDrop();
 
-}
 
+    // ======================================
+    // VALIDATE
+    // ======================================
+
+    validateSlots();
+
+}
 
 // ==========================================
 // 10. DRAG & DROP
