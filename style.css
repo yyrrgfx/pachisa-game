@@ -1526,3 +1526,362 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
     }
 
 }
+/* =========================================================
+   PACHISA COMPACT MOBILE CARD HAND
+   ========================================================= */
+
+/* Player hand ek hi horizontal sequence */
+#player-hand {
+
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    flex-wrap: nowrap !important;
+
+    align-items: center !important;
+
+    justify-content: flex-start !important;
+
+    gap: 2px !important;
+
+    padding: 10px 5px !important;
+
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    min-height: 82px !important;
+
+    box-sizing: border-box !important;
+
+    overflow-x: auto !important;
+
+    overflow-y: hidden !important;
+
+    white-space: nowrap !important;
+
+    border-radius: 12px !important;
+
+}
+
+
+/* Scrollbar small */
+#player-hand::-webkit-scrollbar {
+
+    height: 4px;
+
+}
+
+#player-hand::-webkit-scrollbar-track {
+
+    background:
+        rgba(255,255,255,.04);
+
+}
+
+#player-hand::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255,255,255,.20);
+
+    border-radius: 10px;
+
+}
+
+
+/* =========================================================
+   REMOVE OLD SUIT GROUP SYSTEM
+   ========================================================= */
+
+.hand-suit-group {
+
+    display: contents !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    background: transparent !important;
+
+}
+
+
+.suit-label {
+
+    display: none !important;
+
+}
+
+
+/* =========================================================
+   SMALL PLAYING CARDS
+   ========================================================= */
+
+#player-hand .hand-card {
+
+    position: relative !important;
+
+    flex:
+        0 0 45px !important;
+
+    width: 45px !important;
+
+    min-width: 45px !important;
+
+    max-width: 45px !important;
+
+    height: 66px !important;
+
+    min-height: 66px !important;
+
+    max-height: 66px !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #eeeeee
+        ) !important;
+
+    border:
+        1px solid
+        rgba(0,0,0,.18) !important;
+
+    border-radius: 6px !important;
+
+    box-sizing: border-box !important;
+
+    font-size: 1rem !important;
+
+    font-weight: 900 !important;
+
+    line-height: 1 !important;
+
+    cursor: grab !important;
+
+    white-space: normal !important;
+
+    box-shadow:
+        0 3px 7px
+        rgba(0,0,0,.30) !important;
+
+    transform:
+        translateY(0)
+        rotate(0deg);
+
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease;
+
+}
+
+
+/* Rank */
+#player-hand .hand-card .card-rank {
+
+    font-size:
+        1.05rem;
+
+    line-height:
+        1;
+
+}
+
+
+/* Suit */
+#player-hand .hand-card .card-suit {
+
+    font-size:
+        .85rem;
+
+    line-height:
+        1;
+
+    margin-top:
+        3px;
+
+}
+
+
+/* Red cards */
+#player-hand .hand-card.red {
+
+    color:
+        #d63031 !important;
+
+}
+
+
+/* Black cards */
+#player-hand .hand-card.black {
+
+    color:
+        #151515 !important;
+
+}
+
+
+/* Hover */
+#player-hand .hand-card:hover {
+
+    transform:
+        translateY(-5px) !important;
+
+    z-index:
+        5;
+
+    box-shadow:
+        0 8px 15px
+        rgba(0,0,0,.40) !important;
+
+}
+
+
+/* Dragging */
+#player-hand .hand-card.dragging-card {
+
+    opacity:
+        .45 !important;
+
+    transform:
+        translateY(-8px)
+        scale(.95) !important;
+
+}
+
+
+/* =========================================================
+   DEAL ANIMATION
+   ========================================================= */
+
+#player-hand .hand-card.dealing {
+
+    animation:
+        pachisaDealCard
+        .38s
+        cubic-bezier(.2,.8,.3,1)
+        both;
+
+}
+
+
+@keyframes pachisaDealCard {
+
+    0% {
+
+        opacity: 0;
+
+        transform:
+            translateY(-90px)
+            scale(.55)
+            rotate(-12deg);
+
+    }
+
+    55% {
+
+        opacity: 1;
+
+        transform:
+            translateY(6px)
+            scale(1.05)
+            rotate(3deg);
+
+    }
+
+    100% {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1)
+            rotate(0deg);
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    #player-hand {
+
+        gap: 1px !important;
+
+        padding:
+            8px 3px !important;
+
+        min-height:
+            76px !important;
+
+    }
+
+
+    #player-hand .hand-card {
+
+        flex:
+            0 0 42px !important;
+
+        width:
+            42px !important;
+
+        min-width:
+            42px !important;
+
+        max-width:
+            42px !important;
+
+        height:
+            62px !important;
+
+        min-height:
+            62px !important;
+
+        max-height:
+            62px !important;
+
+        border-radius:
+            5px !important;
+
+    }
+
+
+    #player-hand .hand-card .card-rank {
+
+        font-size:
+            .95rem;
+
+    }
+
+
+    #player-hand .hand-card .card-suit {
+
+        font-size:
+            .75rem;
+
+        margin-top:
+            2px;
+
+    }
+
+}
