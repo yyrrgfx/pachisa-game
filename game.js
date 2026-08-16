@@ -1,9 +1,8 @@
 // ==========================================
 // 1. FIREBASE SETUP & INITIALIZATION
 // ==========================================
-
 const firebaseConfig = {
-    apiKey: "AIzaSyCovQYPsAMDTzdRTB657_yYzxmMK0vCPUE",
+    apiKey: "AIzaSyCovQYPsAMDTzdRTB657_yZxmMK0vCPUE",
     authDomain: "pachisa-e0975.firebaseapp.com",
     databaseURL: "https://pachisa-e0975-default-rtdb.firebaseio.com",
     projectId: "pachisa-e0975",
@@ -13,564 +12,478 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
 const auth = firebase.auth();
 
-
-// ==========================================
-// AUTHENTICATION
-// ==========================================
-
-auth.signInAnonymously()
-    .then(() => {
-        console.log("Firebase Auth Success! Ready to Create/Join.");
-    })
-    .catch(error => {
-        console.error("Firebase Auth Error:", error);
-    });
+auth.signInAnonymously().then(() => {
+    console.log("Firebase Auth Success! Ready to Create/Join.");
+}).catch((error) => console.error(error));
 
 
 // ==========================================
 // 2. GLOBAL VARIABLES & CONSTANTS
 // ==========================================
-
 let roomId = "";
 let playerName = "";
 let isRoomCreator = false;
-
 let globalPlayerNames = [];
 
-let isBattleRunning = false;
-
-let draggedCard = null;
-
-let lastAnnouncedWinner = null;
-
-
-// ==========================================
-// CARD CONSTANTS
-// ==========================================
-
-const SUITS = [
-    "Spades",
-    "Hearts",
-    "Diamonds",
-    "Clubs"
-];
-
-const RANKS = [
-    2, 3, 4, 5, 6, 7, 8, 9, 10,
-    11, 12, 13, 14
-];
+const SUITS = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
+const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
 const suitSymbols = {
-
-    Spades: "♠",
-    Hearts: "♥",
-    Diamonds: "♦",
-    Clubs: "♣"
-
+    Spades: '♠',
+    Hearts: '♥',
+    Diamonds: '♦',
+    Clubs: '♣'
 };
 
 const rankNames = {
-
-    11: "J",
-    12: "Q",
-    13: "K",
-    14: "A"
-
+    11: 'J',
+    12: 'Q',
+    13: 'K',
+    14: 'A'
 };
 
+const lobbyArea = document.getElementById('lobby-area');
+const gameBoard = document.getElementById('game-board');
+const playerHandDiv = document.getElementById('player-hand');
+const slots = document.querySelectorAll('.slot');
+const lockBtn = document.getElementById('lock-btn');
 
-// ==========================================
-// UI ELEMENTS
-// ==========================================
-
-const lobbyArea =
-    document.getElementById("lobby-area");
-
-const gameBoard =
-    document.getElementById("game-board");
-
-const playerHandDiv =
-    document.getElementById("player-hand");
-
-const slots =
-    document.querySelectorAll(".slot");
-
-const lockBtn =
-    document.getElementById("lock-btn");
+let draggedCard = null;
 
 
 // ==========================================
-// 3. CREATE ROOM
+// 3. LOBBY & ROOM MANAGEMENT
 // ==========================================
 
-document
-    .getElementById("create-room-btn")
-    .addEventListener("click", () => {
+document.getElementById('create-room-btn').addEventListener('click', () => {
 
-        playerName =
-            document
-                .getElementById("playerName")
-                .value
-                .trim();
+    playerName =
+        document.getElementById('playerName').value.trim() ||
+        prompt("Bhai, apna naam likho room banane ke liye:");
 
-        if (!playerName) {
+    if (!playerName) return;
 
-            playerName =
-                prompt(
-                    "Bhai, apna naam likho room banane ke liye:"
-                );
+    isRoomCreator = true;
+
+    roomId = Math.floor(1000 + Math.random() * 9000).toString();
+
+    db.ref(`rooms/${roomId}`).set({
+        status: "WAITING",
+        created_at: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+
+        enterRoom(roomId, playerName);
+
+        alert(`Room Ban Gaya! Room ID hai: ${roomId}. Doston ko batao.`);
+
+    });
+});
+
+
+document.getElementById('join-room-btn').addEventListener('click', () => {
+
+    playerName = document.getElementById('playerName').value.trim();
+
+    let enteredRoomId =
+        document.getElementById('roomIdInput').value.trim();
+
+    if (!playerName || !enteredRoomId) {
+        return alert("Naam aur Room ID dono zaroori hain!");
+    }
+
+    db.ref(`rooms/${enteredRoomId}`).once('value', (snapshot) => {
+
+        if (snapshot.exists()) {
+
+            let roomData = snapshot.val();
+
+            let playersCount =
+                roomData.players
+                    ? Object.keys(roomData.players).length
+                    : 0;
+
+            if (playersCount < 3) {
+
+                enterRoom(enteredRoomId, playerName);
+
+            } else {
+
+                alert("Ye room full ho chuka hai (3 players max).");
+
+            }
+
+        } else {
+
+            alert("Room ID galat hai! Aisa koi room nahi bana.");
 
         }
 
-        if (!playerName) return;
-
-        isRoomCreator = true;
-
-        roomId =
-            Math
-                .floor(
-                    1000 +
-                    Math.random() * 9000
-                )
-                .toString();
-
-        db.ref(`rooms/${roomId}`)
-            .set({
-
-                status: "WAITING",
-
-                created_at:
-                    firebase.database.ServerValue.TIMESTAMP
-
-            })
-            .then(() => {
-
-                enterRoom(
-                    roomId,
-                    playerName
-                );
-
-                alert(
-                    `Room Ban Gaya! Room ID hai: ${roomId}. Doston ko batao.`
-                );
-
-            });
-
     });
+});
 
 
-// ==========================================
-// 4. JOIN ROOM
-// ==========================================
-
-document
-    .getElementById("join-room-btn")
-    .addEventListener("click", () => {
-
-        playerName =
-            document
-                .getElementById("playerName")
-                .value
-                .trim();
-
-        const enteredRoomId =
-            document
-                .getElementById("roomIdInput")
-                .value
-                .trim();
-
-        if (
-            !playerName ||
-            !enteredRoomId
-        ) {
-
-            alert(
-                "Naam aur Room ID dono zaroori hain!"
-            );
-
-            return;
-        }
-
-        db.ref(`rooms/${enteredRoomId}`)
-            .once("value", snapshot => {
-
-                if (!snapshot.exists()) {
-
-                    alert(
-                        "Room ID galat hai! Aisa koi room nahi bana."
-                    );
-
-                    return;
-                }
-
-                const roomData =
-                    snapshot.val();
-
-                const playersCount =
-                    roomData.players
-                        ? Object.keys(
-                            roomData.players
-                        ).length
-                        : 0;
-
-                if (playersCount < 3) {
-
-                    isRoomCreator = false;
-
-                    enterRoom(
-                        enteredRoomId,
-                        playerName
-                    );
-
-                } else {
-
-                    alert(
-                        "Ye room full ho chuka hai (3 players max)."
-                    );
-
-                }
-
-            });
-
-    });
-
-
-// ==========================================
-// 5. ENTER ROOM
-// ==========================================
-
-function enterRoom(
-    rId,
-    pName
-) {
+function enterRoom(rId, pName) {
 
     roomId = rId;
 
-    playerName = pName;
-
-    db.ref(
-        `rooms/${roomId}/players/${playerName}`
-    )
-        .set({
-
-            name: playerName,
-
-            status: "JOINED"
-
-        });
-
+    db.ref(`rooms/${roomId}/players/${pName}`).set({
+        name: pName,
+        status: "JOINED"
+    });
 
     lobbyArea.style.display = "none";
-
     gameBoard.style.display = "block";
 
-    document
-        .getElementById("display-room-id")
-        .innerText = roomId;
+    document.getElementById('display-room-id').innerText = roomId;
 
-
-    // Room listeners
     listenToRoomUpdates();
-
-    // IMPORTANT:
-    // Scoreboard listener starts AFTER roomId exists
     listenToGlobalScores();
-
 }
 
 
 // ==========================================
-// 6. ROOM LISTENERS
+// ROOM LISTENERS
 // ==========================================
 
 function listenToRoomUpdates() {
 
+    db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
 
-    // ======================================
-    // PLAYERS WATCHER
-    // ======================================
+        const playersData = snapshot.val();
 
-    db.ref(
-        `rooms/${roomId}/players`
-    )
-        .on("value", snapshot => {
+        if (!playersData) return;
 
-            const playersData =
-                snapshot.val();
-
-            if (!playersData) return;
+        globalPlayerNames = Object.keys(playersData);
 
 
-            globalPlayerNames =
-                Object.keys(playersData);
+        // ==========================================
+        // ROOM FULL
+        // ==========================================
+
+        if (
+            globalPlayerNames.length === 3 &&
+            document.getElementById('opp1-avatar').innerText === "⏳ Wait..."
+        ) {
+
+            console.log("Room full! Starting game...");
+
+            let opponents =
+                globalPlayerNames.filter(n => n !== playerName);
+
+            document.getElementById('opp1-avatar').innerText =
+                opponents[0];
+
+            document.getElementById('opp2-avatar').innerText =
+                opponents[1];
 
 
-            // ==================================
-            // ROOM FULL
-            // ==================================
+            // HOST DEALS
+            if (isRoomCreator) {
 
-            if (
-                globalPlayerNames.length === 3 &&
-                document
-                    .getElementById("opp1-avatar")
-                    .innerText === "⏳ Wait..."
-            ) {
+                let deck = shuffleDeck(generateDeck());
 
-                console.log(
-                    "Room full! Starting game..."
+                db.ref(`rooms/${roomId}/global_scores`).set({
+
+                    [globalPlayerNames[0]]: 0,
+                    [globalPlayerNames[1]]: 0,
+                    [globalPlayerNames[2]]: 0
+
+                });
+
+
+                db.ref(`rooms/${roomId}/current_round`).set({
+
+                    p1_cards: deck.splice(0, 17),
+                    p2_cards: deck.splice(0, 17),
+                    p3_cards: deck.splice(0, 17),
+
+                    center_card: deck[0]
+
+                });
+
+            }
+
+        }
+
+
+        // ==========================================
+        // ALL PLAYERS LOCKED
+        // ==========================================
+
+        let allLocked = true;
+
+        for (let p in playersData) {
+
+            if (playersData[p].status !== "LOCKED") {
+                allLocked = false;
+            }
+
+        }
+
+        if (
+            allLocked &&
+            globalPlayerNames.length === 3
+        ) {
+
+            startBattleAnimation(playersData);
+
+        }
+
+    });
+
+
+    // ==========================================
+    // DEALING ANIMATION
+    // ==========================================
+
+    let lastDealSignature = '';
+
+
+    function animateDealToAllPlayers(roundData, myCards) {
+
+        const table =
+            document.getElementById('virtual-table');
+
+        const deck =
+            document.getElementById('deck-visual');
+
+
+        if (!table || !deck) {
+
+            renderPlayerHand(myCards);
+
+            return;
+        }
+
+
+        table
+            .querySelectorAll('.flying-deal-card')
+            .forEach(el => el.remove());
+
+
+        const targets = [
+
+            document.getElementById('opp1-avatar'),
+
+            document.getElementById('opp2-avatar'),
+
+            document.querySelector(
+                '.avatar:not(#opp1-avatar):not(#opp2-avatar)'
+            )
+
+        ].filter(Boolean);
+
+
+        const localTarget = playerHandDiv;
+
+
+        const allTargets = [
+
+            targets[0],
+            localTarget,
+            targets[1]
+
+        ].filter(Boolean);
+
+
+        const deckRect =
+            deck.getBoundingClientRect();
+
+
+        // 51 CARDS TOTAL
+        // 17 - 17 - 17
+        const totalCards = 51;
+
+        const interval = 65;
+
+
+        for (let i = 0; i < totalCards; i++) {
+
+            setTimeout(() => {
+
+                const target =
+                    allTargets[i % allTargets.length];
+
+                if (!target) return;
+
+
+                const targetRect =
+                    target.getBoundingClientRect();
+
+
+                const card =
+                    document.createElement('div');
+
+                card.className =
+                    'flying-deal-card';
+
+
+                card.style.left =
+                    `${deckRect.left + deckRect.width / 2 - 14}px`;
+
+                card.style.top =
+                    `${deckRect.top + deckRect.height / 2 - 20}px`;
+
+
+                const dx =
+                    targetRect.left +
+                    targetRect.width / 2 -
+                    (deckRect.left + deckRect.width / 2);
+
+
+                const dy =
+                    targetRect.top +
+                    targetRect.height / 2 -
+                    (deckRect.top + deckRect.height / 2);
+
+
+                card.style.setProperty(
+                    '--deal-x',
+                    `${dx}px`
+                );
+
+                card.style.setProperty(
+                    '--deal-y',
+                    `${dy}px`
                 );
 
 
-                // ==================================
-                // SET OPPONENTS
-                // ==================================
-
-                const opponents =
-                    globalPlayerNames.filter(
-                        n => n !== playerName
-                    );
+                table.appendChild(card);
 
 
-                document
-                    .getElementById("opp1-avatar")
-                    .innerText =
-                    opponents[0] || "Player 2";
+                setTimeout(() => {
+
+                    card.remove();
+
+                }, 650);
 
 
-                document
-                    .getElementById("opp2-avatar")
-                    .innerText =
-                    opponents[1] || "Player 3";
+            }, i * interval);
+
+        }
 
 
-                // ==================================
-                // HOST DEALS CARDS
-                // ==================================
+        // Actual player cards appear after dealing
+        setTimeout(() => {
 
-                if (isRoomCreator) {
+            renderPlayerHand(myCards);
 
-                    const deck =
-                        shuffleDeck(
-                            generateDeck()
-                        );
+        }, totalCards * interval + 250);
+
+    }
 
 
-                    // INITIAL SCORES
-
-                    db.ref(
-                        `rooms/${roomId}/global_scores`
-                    )
-                        .set({
-
-                            [globalPlayerNames[0]]: 0,
-
-                            [globalPlayerNames[1]]: 0,
-
-                            [globalPlayerNames[2]]: 0
-
-                        });
-
-
-                    // DEAL 17-17-17
-
-                    db.ref(
-                        `rooms/${roomId}/current_round`
-                    )
-                        .set({
-
-                            p1_cards:
-                                deck.splice(0, 17),
-
-                            p2_cards:
-                                deck.splice(0, 17),
-
-                            p3_cards:
-                                deck.splice(0, 17),
-
-                            center_card:
-                                deck[0]
-
-                        });
-
-                }
-
-            }
-
-
-            // ==================================
-            // CHECK ALL PLAYERS LOCKED
-            // ==================================
-
-            let allLocked = true;
-
-
-            for (
-                const p in playersData
-            ) {
-
-                if (
-                    playersData[p].status !==
-                    "LOCKED"
-                ) {
-
-                    allLocked = false;
-
-                }
-
-            }
-
-
-            if (
-                allLocked &&
-                globalPlayerNames.length === 3
-            ) {
-
-                startBattleAnimation(
-                    playersData
-                );
-
-            }
-
-        });
-
-
-    // ======================================
+    // ==========================================
     // CURRENT ROUND LISTENER
-    // ======================================
+    // ==========================================
 
-    db.ref(
-        `rooms/${roomId}/current_round`
-    )
-        .on("value", snap => {
+    db.ref(`rooms/${roomId}/current_round`)
+        .on('value', (snap) => {
 
             if (!snap.exists()) return;
 
 
-            const roundData =
-                snap.val();
+            let roundData = snap.val();
 
 
-            const deckVis =
-                document.getElementById(
-                    "deck-visual"
-                );
+            let deckVis =
+                document.getElementById('deck-visual');
 
 
             if (deckVis) {
-
-                deckVis.innerText =
-                    "Dealing...";
-
+                deckVis.innerText = "Dealing...";
             }
+
+
+            const myIndex =
+                globalPlayerNames.indexOf(playerName);
+
+
+            const myCards =
+                myIndex === 0
+                    ? roundData.p1_cards
+                    : (
+                        myIndex === 1
+                            ? roundData.p2_cards
+                            : roundData.p3_cards
+                    );
+
+
+            const signature =
+                JSON.stringify({
+
+                    p1: roundData.p1_cards,
+                    p2: roundData.p2_cards,
+                    p3: roundData.p3_cards,
+                    center: roundData.center_card
+
+                });
+
+
+            if (signature === lastDealSignature) {
+                return;
+            }
+
+
+            lastDealSignature = signature;
+
+
+            animateDealToAllPlayers(
+                roundData,
+                myCards
+            );
 
 
             setTimeout(() => {
 
-                const myIndex =
-                    globalPlayerNames.indexOf(
-                        playerName
-                    );
-
-
-                let myCards;
-
-
-                if (myIndex === 0) {
-
-                    myCards =
-                        roundData.p1_cards;
-
-                }
-
-                else if (myIndex === 1) {
-
-                    myCards =
-                        roundData.p2_cards;
-
-                }
-
-                else if (myIndex === 2) {
-
-                    myCards =
-                        roundData.p3_cards;
-
-                }
-
-
-                if (!myCards) return;
-
-
-                renderPlayerHand(
-                    myCards
-                );
-
-
                 if (deckVis) {
-
-                    deckVis.innerText =
-                        "Empty";
-
+                    deckVis.innerText = "Empty";
                 }
 
 
                 const unusablePile =
                     document.getElementById(
-                        "unusable-pile"
+                        'unusable-pile'
                     );
 
 
                 if (unusablePile) {
-
                     unusablePile.innerText =
                         "1 Card";
-
                 }
 
-            }, 1000);
+            }, 4000);
 
         });
 
 }
-
-
 // ==========================================
-// 7. DECK
+// 4. DECK & GAME LOGIC
 // ==========================================
 
 function generateDeck() {
 
-    const deck = [];
+    let deck = [];
 
+    for (let suit of SUITS) {
 
-    for (const suit of SUITS) {
-
-        for (const rank of RANKS) {
+        for (let rank of RANKS) {
 
             deck.push({
-
                 suit: suit,
-
                 rank: rank
-
             });
 
         }
 
     }
 
-
     return deck;
-
 }
 
-
-// ==========================================
-// SHUFFLE
-// ==========================================
 
 function shuffleDeck(deck) {
 
@@ -585,110 +498,58 @@ function shuffleDeck(deck) {
                 Math.random() * (i + 1)
             );
 
-
         [
             deck[i],
             deck[j]
-        ] =
-        [
+        ] = [
             deck[j],
             deck[i]
         ];
 
     }
 
-
     return deck;
-
 }
 
 
-// ==========================================
-// 8. THREE CARD HAND SCORE
-// ==========================================
-
 function getHandScore(cards) {
 
-    if (!cards || cards.length !== 3) {
-
-        return 0;
-
-    }
+    cards.sort(
+        (a, b) => b.rank - a.rank
+    );
 
 
-    const sorted =
-        [...cards].sort(
-            (a, b) =>
-                b.rank - a.rank
-        );
+    let c1 = cards[0];
+    let c2 = cards[1];
+    let c3 = cards[2];
 
 
-    const c1 = sorted[0];
-
-    const c2 = sorted[1];
-
-    const c3 = sorted[2];
-
-
-    // ======================================
-    // COLOR
-    // ======================================
-
-    const isColor =
+    let isColor =
         c1.suit === c2.suit &&
         c2.suit === c3.suit;
 
 
-    // ======================================
-    // SEQUENCE
-    // ======================================
-
-    const normalSequence =
-        c1.rank === c2.rank + 1 &&
-        c2.rank === c3.rank + 1;
-
-
-    // A-2-3
-    const aceLowSequence =
-        c1.rank === 14 &&
-        c2.rank === 3 &&
-        c3.rank === 2;
+    let isSequence =
+        (
+            c1.rank === c2.rank + 1 &&
+            c2.rank === c3.rank + 1
+        ) ||
+        (
+            c1.rank === 14 &&
+            c2.rank === 3 &&
+            c3.rank === 2
+        );
 
 
-    const isSequence =
-        normalSequence ||
-        aceLowSequence;
-
-
-    // ======================================
-    // TRAIL
-    // ======================================
-
-    const isTrail =
+    let isTrail =
         c1.rank === c2.rank &&
         c2.rank === c3.rank;
 
 
-    // ======================================
-    // PAIR
-    // ======================================
-
-    const isPair =
+    let isPair =
         c1.rank === c2.rank ||
-        c2.rank === c3.rank ||
-        c1.rank === c3.rank;
+        c2.rank === c3.rank;
 
-
-    // ======================================
-    // CATEGORY
-    //
-    // Trail       = 6
-    // Pure Seq    = 5
-    // Sequence    = 4
-    // Color       = 3
-    // Pair        = 2
-    // High Card    = 1
-    // ======================================
 
     let category = 1;
 
@@ -697,86 +558,50 @@ function getHandScore(cards) {
 
         category = 6;
 
-    }
-
-    else if (
+    } else if (
         isSequence &&
         isColor
     ) {
 
         category = 5;
 
-    }
-
-    else if (isSequence) {
+    } else if (isSequence) {
 
         category = 4;
 
-    }
-
-    else if (isColor) {
+    } else if (isColor) {
 
         category = 3;
 
-    }
-
-    else if (isPair) {
+    } else if (isPair) {
 
         category = 2;
 
     }
 
 
-    // ======================================
-    // VALUE
-    // ======================================
-
     let val1 = c1.rank;
-
     let val2 = c2.rank;
-
     let val3 = c3.rank;
 
 
-    // PAIR
     if (
         isPair &&
         c2.rank === c3.rank
     ) {
 
         val1 = c2.rank;
-
         val2 = c3.rank;
-
         val3 = c1.rank;
 
-    }
-
-    else if (
-        isPair &&
-        c1.rank === c2.rank
-    ) {
-
-        val1 = c1.rank;
-
-        val2 = c2.rank;
-
-        val3 = c3.rank;
-
-    }
-
-
-    // A-2-3 LOW SEQUENCE
-    if (
+    } else if (
         isSequence &&
         c1.rank === 14 &&
         c2.rank === 3
     ) {
 
         val1 = 3;
-
         val2 = 2;
-
         val3 = 14;
 
     }
@@ -784,131 +609,133 @@ function getHandScore(cards) {
 
     return (
         category * 1000000
-    )
-    +
+    ) +
     (
         val1 * 10000
-    )
-    +
+    ) +
     (
         val2 * 100
-    )
-    +
+    ) +
     val3;
 
 }
 
 
 // ==========================================
-// 9. RENDER PLAYER HAND
-// ==========================================
-
-// ==========================================
-// RENDER PLAYER HAND
-// ==========================================
-//
-// Cards:
-// 1. One-by-one deal animation
-// 2. Automatically grouped by suit
-// 3. Spades -> Hearts -> Diamonds -> Clubs
-//
-// ==========================================
-
-// ==========================================
-// RENDER PLAYER HAND
-// SIMPLE COMPACT HORIZONTAL HAND
+// 5. UI, DRAG & DROP
 // ==========================================
 
 function renderPlayerHand(cardsArray) {
+
     playerHandDiv.innerHTML = '';
 
-    cardsArray.forEach((card, index) => {
 
-        const cardEl =
-            document.createElement('div');
+    cardsArray.forEach(
+        (card, index) => {
 
-        cardEl.classList.add('card');
-
-        cardEl.classList.add(
-            (
-                card.suit === 'Hearts' ||
-                card.suit === 'Diamonds'
-            )
-                ? 'red'
-                : 'black'
-        );
-
-        let displayRank =
-            rankNames[card.rank] ||
-            card.rank;
-
-        cardEl.innerText =
-            `${displayRank}${suitSymbols[card.suit]}`;
-
-        cardEl.dataset.suit =
-            card.suit;
-
-        cardEl.dataset.rank =
-            card.rank;
-
-        cardEl.dataset.id =
-            `card-${index}`;
-
-        cardEl.setAttribute(
-            'draggable',
-            'true'
-        );
+            const cardEl =
+                document.createElement('div');
 
 
-        // ORIGINAL DRAG FEEL
-        cardEl.addEventListener(
-            'dragstart',
-            function () {
-
-                draggedCard = this;
-
-                setTimeout(
-                    () => {
-                        this.style.opacity = '0.5';
-                    },
-                    0
-                );
-
-            }
-        );
+            cardEl.classList.add(
+                'card',
+                'dealing'
+            );
 
 
-        cardEl.addEventListener(
-            'dragend',
-            function () {
+            cardEl.classList.add(
 
-                setTimeout(
-                    () => {
-                        this.style.opacity = '1';
-                    },
-                    0
-                );
+                (
+                    card.suit === 'Hearts' ||
+                    card.suit === 'Diamonds'
+                )
+                    ? 'red'
+                    : 'black'
 
-                draggedCard = null;
-
-                validateSlots();
-
-            }
-        );
+            );
 
 
-        playerHandDiv.appendChild(
-            cardEl
-        );
+            const displayRank =
+                rankNames[card.rank] ||
+                card.rank;
 
-    });
+
+            cardEl.innerText =
+                `${displayRank}${suitSymbols[card.suit]}`;
+
+
+            cardEl.dataset.suit =
+                card.suit;
+
+            cardEl.dataset.rank =
+                card.rank;
+
+            cardEl.dataset.id =
+                `card-${index}`;
+
+
+            cardEl.setAttribute(
+                'draggable',
+                'true'
+            );
+
+
+            // DRAG START
+            cardEl.addEventListener(
+                'dragstart',
+                function () {
+
+                    draggedCard = this;
+
+                    setTimeout(() => {
+
+                        this.style.opacity =
+                            '0.5';
+
+                    }, 0);
+
+                }
+            );
+
+
+            // DRAG END
+            cardEl.addEventListener(
+                'dragend',
+                function () {
+
+                    setTimeout(() => {
+
+                        this.style.opacity =
+                            '1';
+
+                    }, 0);
+
+
+                    draggedCard = null;
+
+                    validateSlots();
+
+                }
+            );
+
+
+            // Hand card arrival animation
+            cardEl.style.animationDelay =
+                `${index * 75}ms`;
+
+
+            playerHandDiv.appendChild(
+                cardEl
+            );
+
+        }
+    );
 
 
     setupDragAndDrop();
+
 }
-// ==========================================
-// 10. DRAG & DROP
-// ==========================================
+
 
 // ==========================================
 // DRAG & DROP
@@ -921,72 +748,71 @@ function setupDragAndDrop() {
         playerHandDiv
     ];
 
-    dropZones.forEach(
-        zone => {
 
-            zone.addEventListener(
-                'dragover',
-                e => e.preventDefault()
-            );
+    dropZones.forEach(zone => {
 
-            zone.addEventListener(
-                'dragenter',
-                e => e.preventDefault()
-            );
-
-            zone.addEventListener(
-                'drop',
-                function(e) {
-
-                    e.preventDefault();
-
-                    e.stopPropagation();
+        zone.addEventListener(
+            'dragover',
+            e => e.preventDefault()
+        );
 
 
-                    if (draggedCard) {
-
-                        if (
-                            this.classList.contains(
-                                'slot'
-                            )
-                        ) {
-
-                            if (
-                                this.children.length < 3
-                            ) {
-
-                                this.appendChild(
-                                    draggedCard
-                                );
-
-                            }
-
-                        }
-
-                        else {
-
-                            this.appendChild(
-                                draggedCard
-                            );
-
-                        }
+        zone.addEventListener(
+            'dragenter',
+            e => e.preventDefault()
+        );
 
 
-                        draggedCard = null;
+        zone.addEventListener(
+            'drop',
+            function (e) {
 
-                        validateSlots();
+                e.preventDefault();
+                e.stopPropagation();
+
+
+                if (!draggedCard) return;
+
+
+                if (
+                    this.classList.contains(
+                        'slot'
+                    )
+                ) {
+
+                    if (
+                        this.children.length < 3
+                    ) {
+
+                        this.appendChild(
+                            draggedCard
+                        );
 
                     }
 
-                }
-            );
+                } else {
 
-        }
-    );
+                    this.appendChild(
+                        draggedCard
+                    );
+
+                }
+
+
+                draggedCard = null;
+
+                validateSlots();
+
+            }
+        );
+
+    });
+
 }
 
+
 // ==========================================
-// 11. VALIDATE SLOTS
+// VALIDATE SLOTS
 // ==========================================
 
 function validateSlots() {
@@ -994,14 +820,12 @@ function validateSlots() {
     let totalCardsInSlots = 0;
 
 
-    slots.forEach(
-        slot => {
+    slots.forEach(slot => {
 
-            totalCardsInSlots +=
-                slot.children.length;
+        totalCardsInSlots +=
+            slot.children.length;
 
-        }
-    );
+    });
 
 
     lockBtn.disabled =
@@ -1011,53 +835,48 @@ function validateSlots() {
 
 
 // ==========================================
-// 12. LOCK CARDS
+// LOCK CARDS
 // ==========================================
 
 lockBtn.addEventListener(
-    "click",
+    'click',
     () => {
 
-        const allSlotsData = [];
+        let allSlotsData = [];
 
 
         slots.forEach(
             (slot, index) => {
 
-                const cardsInSlot = [];
+                let cardsInSlot = [];
 
 
                 slot
-                    .querySelectorAll(".card")
-                    .forEach(
-                        cardEl => {
+                    .querySelectorAll('.card')
+                    .forEach(cardEl => {
 
-                            cardsInSlot.push({
+                        cardsInSlot.push({
 
-                                domElement:
-                                    cardEl,
+                            domElement: cardEl,
 
-                                suit:
-                                    cardEl.dataset.suit,
+                            suit:
+                                cardEl.dataset.suit,
 
-                                rank:
-                                    parseInt(
-                                        cardEl.dataset.rank
-                                    )
+                            rank:
+                                parseInt(
+                                    cardEl.dataset.rank
+                                )
 
-                            });
+                        });
 
-                        }
-                    );
+                    });
 
 
                 allSlotsData.push({
 
-                    slotIndex:
-                        index,
+                    slotIndex: index,
 
-                    cards:
-                        cardsInSlot,
+                    cards: cardsInSlot,
 
                     score:
                         getHandScore(
@@ -1070,10 +889,7 @@ lockBtn.addEventListener(
         );
 
 
-        // ======================================
-        // SORT STRONGEST -> WEAKEST
-        // ======================================
-
+        // Strongest -> Weakest
         allSlotsData.sort(
             (a, b) =>
                 b.score - a.score
@@ -1103,50 +919,38 @@ lockBtn.addEventListener(
         );
 
 
-        // ======================================
-        // DISCARD REMAINING 2 CARDS
-        // ======================================
-
-        const unusedCards =
+        // Remaining cards discard
+        let unusedCards =
             playerHandDiv
-                .querySelectorAll(
-                    ".card"
-                );
+                .querySelectorAll('.card');
 
 
-        unusedCards.forEach(
-            card => {
+        unusedCards.forEach(card => {
 
-                card.classList.add(
-                    "discard-anim"
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        card.remove();
+            card.classList.add(
+                'discard-anim'
+            );
 
 
-                        const up =
-                            document.getElementById(
-                                "unusable-pile"
-                            );
+            setTimeout(() => {
+
+                card.remove();
 
 
-                        if (up) {
+                let up =
+                    document.getElementById(
+                        'unusable-pile'
+                    );
 
-                            up.innerText =
-                                "3 Cards";
 
-                        }
+                if (up) {
+                    up.innerText =
+                        "3 Cards";
+                }
 
-                    },
-                    500
-                );
+            }, 500);
 
-            }
-        );
+        });
 
 
         lockBtn.disabled = true;
@@ -1156,42 +960,32 @@ lockBtn.addEventListener(
 
 
         document
-            .querySelectorAll(".card")
-            .forEach(
-                card => {
+            .querySelectorAll('.card')
+            .forEach(card => {
 
-                    card.setAttribute(
-                        "draggable",
-                        "false"
-                    );
+                card.setAttribute(
+                    'draggable',
+                    'false'
+                );
 
-                    card.style.cursor =
-                        "default";
+                card.style.cursor =
+                    'default';
 
-                }
-            );
+            });
 
-
-        // ======================================
-        // SEND DATA TO FIREBASE
-        // ======================================
 
         const formattedSlots =
             allSlotsData.map(
                 slot => ({
 
-                    score:
-                        slot.score,
+                    score: slot.score,
 
                     cards:
                         slot.cards.map(
                             c => ({
 
-                                suit:
-                                    c.suit,
-
-                                rank:
-                                    c.rank
+                                suit: c.suit,
+                                rank: c.rank
 
                             })
                         )
@@ -1202,602 +996,878 @@ lockBtn.addEventListener(
 
         db.ref(
             `rooms/${roomId}/players/${playerName}`
-        )
-            .update({
+        ).update({
 
-                lockedSlots:
-                    formattedSlots,
+            lockedSlots:
+                formattedSlots,
 
-                status:
-                    "LOCKED"
+            status:
+                "LOCKED"
 
-            });
+        });
 
     }
 );
-
-
 // ==========================================
-// 13. BATTLE ANIMATION
+// 6. BATTLE UI HELPERS
 // ==========================================
 
-// ==========================================
-// 13. MANUAL BATTLE SYSTEM
-// ==========================================
-//
-// Ab fight automatic timer se nahi chalegi.
-//
-// User NEXT button dabayega.
-// Firebase battle_state ke through
-// 3 players ko same slot/same result dikhega.
-//
-// ==========================================
+// NEXT button + responsive battle UI
+// JS khud create karega agar HTML me button nahi hai.
 
-let battleListenerAttached = false;
+function ensureBattleUI() {
 
-let battleHistoryHTML = "";
-
-let battleFinishedHandled = false;
+    let battleArena =
+        document.getElementById(
+            'battle-arena'
+        );
 
 
-// ==========================================
-// START BATTLE
-// ==========================================
-
-function startBattleAnimation(playersData) {
-
-    if (isBattleRunning) return;
-
-    isBattleRunning = true;
-
-    battleFinishedHandled = false;
-
-    battleHistoryHTML = "";
+    if (!battleArena) {
+        return null;
+    }
 
 
-    const battleArena =
-        document.getElementById("battle-arena");
+    // ==========================================
+    // CREATE NEXT BUTTON
+    // ==========================================
 
-    const battleTitle =
-        document.getElementById("battle-title");
-
-    const battleCards =
-        document.getElementById("battle-cards");
-
-    const battleWinner =
-        document.getElementById("battle-winner");
-
-    const nextBtn =
-        document.getElementById("battle-next-btn");
+    let nextBtn =
+        document.getElementById(
+            'battle-next-btn'
+        );
 
 
-    if (battleArena) {
+    if (!nextBtn) {
 
-        battleArena.style.display = "block";
+        nextBtn =
+            document.createElement(
+                'button'
+            );
+
+
+        nextBtn.id =
+            'battle-next-btn';
+
+
+        nextBtn.className =
+            'battle-next-btn';
+
+
+        nextBtn.type =
+            'button';
+
+
+        nextBtn.innerText =
+            'Next → Slot 2';
+
+
+        battleArena.appendChild(
+            nextBtn
+        );
 
     }
 
 
-    // ======================================
-    // ATTACH FIREBASE BATTLE LISTENER
-    // ======================================
+    // ==========================================
+    // STEP INDICATOR
+    // ==========================================
 
-    if (!battleListenerAttached) {
-
-        battleListenerAttached = true;
-
-
-        db.ref(
-            `rooms/${roomId}/battle_state`
+    if (
+        !document.getElementById(
+            'battle-step-number'
         )
-        .on(
-            "value",
-            snapshot => {
+    ) {
 
-                const battleState =
-                    snapshot.val();
-
-
-                // No battle yet
-                if (!battleState) {
-
-                    return;
-
-                }
+        const title =
+            document.getElementById(
+                'battle-title'
+            );
 
 
-                // ==================================
-                // GAME FINISHED
-                // ==================================
+        if (title) {
 
-                if (
-                    battleState.status ===
-                    "FINISHED"
-                ) {
-
-                    if (battleArena) {
-
-                        battleArena.style.display =
-                            "none";
-
-                    }
-
-
-                    // Prevent duplicate score update
-                    if (
-                        battleFinishedHandled
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    battleFinishedHandled =
-                        true;
-
-
-                    // ==================================
-                    // CALCULATE ALL 5 WINNERS
-                    // ==================================
-
-                    const roundPoints = {};
-
-
-                    globalPlayerNames.forEach(
-                        name => {
-
-                            roundPoints[name] =
-                                0;
-
-                        }
-                    );
-
-
-                    for (
-                        let slotIndex = 0;
-                        slotIndex < 5;
-                        slotIndex++
-                    ) {
-
-                        let winner = null;
-
-                        let highestScore = -1;
-
-
-                        globalPlayerNames.forEach(
-                            name => {
-
-                                const slotData =
-                                    playersData[name]
-                                        .lockedSlots[
-                                            slotIndex
-                                        ];
-
-
-                                if (!slotData) return;
-
-
-                                if (
-                                    slotData.score >
-                                    highestScore
-                                ) {
-
-                                    highestScore =
-                                        slotData.score;
-
-                                    winner =
-                                        name;
-
-                                }
-
-                            }
-                        );
-
-
-                        if (winner) {
-
-                            roundPoints[winner] += 1;
-
-                        }
-
-                    }
-
-
-                    // ==================================
-                    // HISTORY SAVE
-                    // ==================================
-
-                    const historyContent =
-                        document.getElementById(
-                            "history-content"
-                        );
-
-
-                    if (historyContent) {
-
-                        historyContent.innerHTML =
-                            battleHistoryHTML;
-
-                    }
-
-
-                    // ==================================
-                    // UPDATE SCORE
-                    // ==================================
-
-                    updateGlobalScores(
-                        roundPoints
-                    );
-
-
-                    return;
-
-                }
-
-
-                // ==================================
-                // CURRENT SLOT
-                // ==================================
-
-                const currentSlot =
-                    Number(
-                        battleState.slot || 0
-                    );
-
-
-                renderBattleSlot(
-                    playersData,
-                    currentSlot
+            const step =
+                document.createElement(
+                    'span'
                 );
 
 
-            }
-        );
+            step.id =
+                'battle-step-number';
+
+
+            step.style.display =
+                'none';
+
+
+            title.parentNode.insertBefore(
+                step,
+                title.nextSibling
+            );
+
+        }
 
     }
 
 
-    // ======================================
-    // HOST INITIALIZES BATTLE
-    // ======================================
+    // ==========================================
+    // INJECT RESPONSIVE CSS
+    // ==========================================
 
-    if (isRoomCreator) {
-
-        db.ref(
-            `rooms/${roomId}/battle_state`
+    if (
+        !document.getElementById(
+            'pachisa-battle-fix-style'
         )
-        .once(
-            "value",
-            snapshot => {
+    ) {
 
-                const existingState =
-                    snapshot.val();
+        const style =
+            document.createElement(
+                'style'
+            );
 
 
-                // Agar already battle running hai
-                if (
-                    existingState &&
-                    existingState.status ===
-                    "PLAYING"
-                ) {
+        style.id =
+            'pachisa-battle-fix-style';
 
-                    return;
+
+        style.textContent = `
+
+            /* ==========================================
+               BATTLE PANEL
+            ========================================== */
+
+            #battle-arena {
+
+                position: fixed !important;
+
+                top: 3vh !important;
+
+                left: 50% !important;
+
+                transform:
+                    translateX(-50%) !important;
+
+                width:
+                    min(94vw, 900px) !important;
+
+                height:
+                    90vh !important;
+
+                max-height:
+                    90vh !important;
+
+                box-sizing:
+                    border-box !important;
+
+                z-index:
+                    9999 !important;
+
+                display:
+                    flex !important;
+
+                flex-direction:
+                    column !important;
+
+                overflow-y:
+                    auto !important;
+
+                overflow-x:
+                    hidden !important;
+
+                -webkit-overflow-scrolling:
+                    touch !important;
+
+                padding:
+                    18px !important;
+
+            }
+
+
+            /* ==========================================
+               BATTLE CARDS
+            ========================================== */
+
+            #battle-arena #battle-cards {
+
+                flex:
+                    0 0 auto !important;
+
+                min-height:
+                    0 !important;
+
+                overflow:
+                    visible !important;
+
+                width:
+                    100% !important;
+
+            }
+
+
+            /* ==========================================
+               NEXT BUTTON
+            ========================================== */
+
+            #battle-next-btn,
+            #battle-arena .battle-next-btn {
+
+                display:
+                    block !important;
+
+                flex-shrink:
+                    0 !important;
+
+                position:
+                    sticky !important;
+
+                bottom:
+                    0 !important;
+
+                z-index:
+                    50 !important;
+
+                width:
+                    100% !important;
+
+                max-width:
+                    430px !important;
+
+                margin:
+                    12px auto 4px !important;
+
+                padding:
+                    15px 20px !important;
+
+                border:
+                    none !important;
+
+                border-radius:
+                    15px !important;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #f1c40f,
+                        #e67e22
+                    ) !important;
+
+                color:
+                    #161616 !important;
+
+                font-size:
+                    1rem !important;
+
+                font-weight:
+                    900 !important;
+
+                cursor:
+                    pointer !important;
+
+                box-shadow:
+                    0 8px 25px
+                    rgba(0,0,0,.45) !important;
+
+            }
+
+
+            /* ==========================================
+               FLYING DEAL CARD
+            ========================================== */
+
+            .flying-deal-card {
+
+                position:
+                    fixed !important;
+
+                width:
+                    28px !important;
+
+                height:
+                    40px !important;
+
+                border-radius:
+                    5px !important;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #17202a,
+                        #34495e
+                    ) !important;
+
+                border:
+                    2px solid
+                    rgba(255,255,255,.8)
+                    !important;
+
+                box-shadow:
+                    0 5px 15px
+                    rgba(0,0,0,.45)
+                    !important;
+
+                z-index:
+                    100000 !important;
+
+                pointer-events:
+                    none !important;
+
+                animation:
+                    pachisaFlyCard
+                    .58s
+                    cubic-bezier(.18,.82,.28,1)
+                    forwards !important;
+
+                transform-origin:
+                    center center !important;
+
+            }
+
+
+            .flying-deal-card::after {
+
+                content:
+                    '★' !important;
+
+                position:
+                    absolute !important;
+
+                inset:
+                    0 !important;
+
+                display:
+                    flex !important;
+
+                align-items:
+                    center !important;
+
+                justify-content:
+                    center !important;
+
+                color:
+                    #f1c40f !important;
+
+                font-size:
+                    15px !important;
+
+            }
+
+
+            /* ==========================================
+               FLYING ANIMATION
+            ========================================== */
+
+            @keyframes pachisaFlyCard {
+
+                0% {
+
+                    opacity: 1;
+
+                    transform:
+                        translate(0,0)
+                        scale(.75)
+                        rotate(-20deg);
 
                 }
 
 
-                db.ref(
-                    `rooms/${roomId}/battle_state`
-                )
-                .set({
+                55% {
 
-                    status: "PLAYING",
+                    opacity: 1;
 
-                    slot: 0
+                    transform:
+                        translate(
+                            calc(var(--deal-x) * .55),
+                            calc(var(--deal-y) * .55)
+                        )
+                        scale(1.05)
+                        rotate(8deg);
 
-                });
+                }
+
+
+                100% {
+
+                    opacity: 0;
+
+                    transform:
+                        translate(
+                            var(--deal-x),
+                            var(--deal-y)
+                        )
+                        scale(.7)
+                        rotate(18deg);
+
+                }
 
             }
+
+
+            /* ==========================================
+               PLAYER HAND CARD DEAL
+            ========================================== */
+
+            .card.dealing {
+
+                animation:
+                    pachisaHandCard
+                    .42s
+                    cubic-bezier(.2,.8,.3,1)
+                    both !important;
+
+            }
+
+
+            @keyframes pachisaHandCard {
+
+                0% {
+
+                    opacity: 0;
+
+                    transform:
+                        translateY(-35px)
+                        scale(.55)
+                        rotate(-10deg);
+
+                }
+
+
+                70% {
+
+                    opacity: 1;
+
+                    transform:
+                        translateY(5px)
+                        scale(1.04)
+                        rotate(2deg);
+
+                }
+
+
+                100% {
+
+                    opacity: 1;
+
+                    transform:
+                        translateY(0)
+                        scale(1)
+                        rotate(0);
+
+                }
+
+            }
+
+
+            /* ==========================================
+               MOBILE
+            ========================================== */
+
+            @media (max-width: 700px) {
+
+                #battle-arena {
+
+                    top:
+                        2vh !important;
+
+                    width:
+                        94vw !important;
+
+                    height:
+                        94vh !important;
+
+                    max-height:
+                        94vh !important;
+
+                    padding:
+                        12px !important;
+
+                    border-radius:
+                        18px !important;
+
+                }
+
+
+                #battle-arena #battle-cards {
+
+                    display:
+                        grid !important;
+
+                    grid-template-columns:
+                        1fr !important;
+
+                    gap:
+                        10px !important;
+
+                }
+
+
+                #battle-next-btn,
+                #battle-arena .battle-next-btn {
+
+                    min-height:
+                        52px !important;
+
+                    font-size:
+                        .95rem !important;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
         );
 
     }
 
 
-    // ======================================
-    // NEXT BUTTON
-    // ======================================
-
-    if (nextBtn) {
-
-        nextBtn.onclick =
-            () => {
-
-                nextBattleSlot();
-
-            };
-
-    }
-
+    return nextBtn;
 }
 
 
 // ==========================================
-// RENDER CURRENT BATTLE SLOT
+// 7. EPIC BATTLE ANIMATION & SCORING
 // ==========================================
 
-function renderBattleSlot(
-    playersData,
-    currentSlot
+let isBattleRunning = false;
+
+
+function startBattleAnimation(
+    playersData
 ) {
+
+    if (isBattleRunning) {
+        return;
+    }
+
+
+    isBattleRunning = true;
+
+
+    const battleArena =
+        document.getElementById(
+            'battle-arena'
+        );
+
 
     const battleTitle =
         document.getElementById(
-            "battle-title"
+            'battle-title'
         );
 
 
     const battleCards =
         document.getElementById(
-            "battle-cards"
+            'battle-cards'
         );
 
 
     const battleWinner =
         document.getElementById(
-            "battle-winner"
+            'battle-winner'
         );
+
+
+    if (!battleArena) {
+        return;
+    }
 
 
     const nextBtn =
-        document.getElementById(
-            "battle-next-btn"
-        );
+        ensureBattleUI();
 
 
-    const stepNumber =
-        document.getElementById(
-            "battle-step-number"
-        );
+    battleArena.style.display =
+        'flex';
 
 
-    if (battleTitle) {
-
-        battleTitle.innerText =
-            `SLOT ${currentSlot + 1}`;
-
-    }
+    let currentSlot = 0;
 
 
-    if (stepNumber) {
-
-        stepNumber.innerText =
-            currentSlot + 1;
-
-    }
-
-
-    if (battleCards) {
-
-        battleCards.innerHTML =
-            "";
-
-    }
-
-
-    if (battleWinner) {
-
-        battleWinner.innerHTML =
-            "";
-
-    }
-
-
-    // ======================================
-    // FIND SLOT WINNER
-    // ======================================
-
-    let slotWinner = null;
-
-    let highestScore = -1;
-
-
-    let slotCardsHTML = "";
+    const roundPoints = {};
 
 
     globalPlayerNames.forEach(
         name => {
 
-            const slotData =
-                playersData[name]
-                    .lockedSlots[
-                        currentSlot
-                    ];
+            roundPoints[name] =
+                0;
+
+        }
+    );
 
 
-            if (
-                !slotData ||
-                !slotData.cards
-            ) {
-
-                return;
-
-            }
+    let lastRoundHistoryHTML =
+        '';
 
 
-            const c1 =
-                slotData.cards[0];
+    // ==========================================
+    // SHOW CURRENT SLOT
+    // ==========================================
 
-            const c2 =
-                slotData.cards[1];
+    function showBattleSlot() {
 
-            const c3 =
-                slotData.cards[2];
+        if (currentSlot >= 5) {
 
+            finishBattle();
 
-            const r1 =
-                rankNames[c1.rank] ||
-                c1.rank;
+            return;
 
-            const r2 =
-                rankNames[c2.rank] ||
-                c2.rank;
-
-            const r3 =
-                rankNames[c3.rank] ||
-                c3.rank;
+        }
 
 
-            const s1 =
-                suitSymbols[c1.suit];
+        let slotWinner = null;
 
-            const s2 =
-                suitSymbols[c2.suit];
+        let highestScore = -1;
 
-            const s3 =
-                suitSymbols[c3.suit];
+        let slotCardsHTML = '';
 
 
-            const cardString =
-                `${r1}${s1} ${r2}${s2} ${r3}${s3}`;
+        if (battleCards) {
+
+            battleCards.innerHTML =
+                '';
+
+        }
 
 
-            // ==================================
-            // FIND WINNER
-            // ==================================
+        if (battleWinner) {
 
-            if (
-                slotData.score >
-                highestScore
-            ) {
+            battleWinner.innerHTML =
+                '';
 
-                highestScore =
-                    slotData.score;
-
-                slotWinner =
-                    name;
-
-            }
+        }
 
 
-            // ==================================
-            // BATTLE CARD UI
-            // ==================================
+        if (battleTitle) {
 
-            if (battleCards) {
+            battleTitle.innerText =
+                `Fighting: SLOT ${currentSlot + 1}`;
 
-                battleCards.innerHTML += `
+        }
 
-                    <div
-                        class="battle-player-card"
-                    >
 
-                        <div
-                            class="battle-player-name"
-                        >
+        const stepNumber =
+            document.getElementById(
+                'battle-step-number'
+            );
 
-                            ${name}
+
+        if (stepNumber) {
+
+            stepNumber.innerText =
+                String(
+                    currentSlot + 1
+                );
+
+        }
+
+
+        // ==========================================
+        // SHOW ALL 3 PLAYERS
+        // ==========================================
+
+        globalPlayerNames.forEach(
+            name => {
+
+                const playerData =
+                    playersData[name];
+
+
+                const slotData =
+                    playerData &&
+                    playerData.lockedSlots
+                        ? playerData.lockedSlots[
+                            currentSlot
+                        ]
+                        : null;
+
+
+                if (
+                    !slotData ||
+                    !slotData.cards ||
+                    slotData.cards.length < 3
+                ) {
+
+                    return;
+
+                }
+
+
+                const cards =
+                    slotData.cards;
+
+
+                const cardHTML =
+                    cards.map(card => {
+
+                        const rank =
+                            rankNames[card.rank] ||
+                            card.rank;
+
+
+                        const suit =
+                            suitSymbols[card.suit] ||
+                            '';
+
+
+                        const red =
+                            card.suit === 'Hearts' ||
+                            card.suit === 'Diamonds';
+
+
+                        return `
+                            <div class="battle-single-card ${red ? 'battle-red' : 'battle-black'}">
+
+                                <span>${rank}</span>
+
+                                <span>${suit}</span>
+
+                            </div>
+                        `;
+
+                    }).join('');
+
+
+                const cardString =
+                    cards.map(card => {
+
+                        return (
+                            rankNames[card.rank] ||
+                            card.rank
+                        ) +
+                        (
+                            suitSymbols[card.suit] ||
+                            ''
+                        );
+
+                    }).join(' | ');
+
+
+                if (battleCards) {
+
+                    battleCards.innerHTML += `
+
+                        <div class="battle-player-card">
+
+                            <div class="battle-player-name">
+                                ${name}
+                            </div>
+
+                            <div class="battle-playing-cards">
+
+                                ${cardHTML}
+
+                            </div>
+
+                            <div class="battle-combination">
+
+                                ${cardString}
+
+                            </div>
 
                         </div>
 
+                    `;
 
-                        <div
-                            class="battle-playing-cards"
-                        >
-
-                            <div
-                                class="
-                                    battle-single-card
-                                    ${
-                                        (
-                                            c1.suit ===
-                                            "Hearts" ||
-                                            c1.suit ===
-                                            "Diamonds"
-                                        )
-                                            ? "red"
-                                            : "black"
-                                    }
-                                "
-                            >
-                                ${r1}
-                                <span>${s1}</span>
-                            </div>
+                }
 
 
-                            <div
-                                class="
-                                    battle-single-card
-                                    ${
-                                        (
-                                            c2.suit ===
-                                            "Hearts" ||
-                                            c2.suit ===
-                                            "Diamonds"
-                                        )
-                                            ? "red"
-                                            : "black"
-                                    }
-                                "
-                            >
-                                ${r2}
-                                <span>${s2}</span>
-                            </div>
+                slotCardsHTML += `
 
+                    <div class="history-player">
 
-                            <div
-                                class="
-                                    battle-single-card
-                                    ${
-                                        (
-                                            c3.suit ===
-                                            "Hearts" ||
-                                            c3.suit ===
-                                            "Diamonds"
-                                        )
-                                            ? "red"
-                                            : "black"
-                                    }
-                                "
-                            >
-                                ${r3}
-                                <span>${s3}</span>
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            class="battle-combination"
-                        >
-
-                            ${cardString}
-
-                        </div>
+                        <strong>${name}</strong>
+                        <br>
+                        ${cardString}
 
                     </div>
 
                 `;
 
+
+                const score =
+                    Number(
+                        slotData.score || 0
+                    );
+
+
+                if (
+                    score > highestScore
+                ) {
+
+                    highestScore =
+                        score;
+
+                    slotWinner =
+                        name;
+
+                }
+
             }
+        );
 
 
-            // ==================================
-            // HISTORY
-            // ==================================
+        if (!slotWinner) {
+            return;
+        }
 
-            slotCardsHTML += `
 
-                <div class="history-player">
+        // ==========================================
+        // HISTORY
+        // ==========================================
+
+        lastRoundHistoryHTML += `
+
+            <div class="history-battle-round">
+
+                <div class="history-round-header">
 
                     <strong>
-                        ${name}
+                        Slot ${currentSlot + 1}
                     </strong>
 
-                    <br>
+                    <span>
+                        Winner: 🎉 ${slotWinner}
+                    </span>
+
+                </div>
+
+                <div class="history-row">
+
+                    ${slotCardsHTML}
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        // ==========================================
+        // POINT
+        // ==========================================
+
+        roundPoints[slotWinner] += 1;
+
+
+        if (battleWinner) {
+
+            battleWinner.innerHTML = `
+
+                <div class="battle-result">
+
+                    🎉
+
+                    <strong>
+                        ${slotWinner}
+                    </strong>
 
                     <span>
-                        ${cardString}
+                        +1 Point
                     </span>
 
                 </div>
@@ -1805,223 +1875,147 @@ function renderBattleSlot(
             `;
 
         }
-    );
 
 
-    // ======================================
-    // SHOW WINNER
-    // ======================================
+        // ==========================================
+        // NEXT BUTTON
+        // ==========================================
 
-    if (battleWinner) {
+        if (nextBtn) {
 
-        battleWinner.innerHTML = `
+            nextBtn.style.display =
+                'block';
 
-            <div class="battle-result">
 
-                🏆
+            nextBtn.innerText =
+                currentSlot === 4
+                    ? 'Finish Round ✓'
+                    : `Next → Slot ${currentSlot + 2}`;
 
-                <strong>
-                    ${slotWinner}
-                </strong>
+        }
 
-                wins this round
 
-                <span>
-                    +1 POINT
-                </span>
+        currentSlot++;
 
-            </div>
 
-        `;
+        // Scroll panel to top
+        battleArena.scrollTop = 0;
 
     }
 
 
-    // ======================================
-    // ADD TO HISTORY
-    // ======================================
+    // ==========================================
+    // FINISH BATTLE
+    // ==========================================
 
-    battleHistoryHTML += `
+    function finishBattle() {
 
-        <div class="history-battle-round">
+        if (nextBtn) {
 
-            <div class="history-round-header">
+            nextBtn.style.display =
+                'none';
 
-                <strong>
-                    SLOT ${currentSlot + 1}
-                </strong>
-
-                <span>
-                    🏆 ${slotWinner}
-                </span>
-
-            </div>
+        }
 
 
-            <div class="history-row">
+        if (battleArena) {
 
-                ${slotCardsHTML}
+            battleArena.style.display =
+                'none';
 
-            </div>
-
-        </div>
-
-    `;
+        }
 
 
-    // ======================================
-    // NEXT BUTTON
-    // ======================================
+        const historyContent =
+            document.getElementById(
+                'history-content'
+            );
+
+
+        if (historyContent) {
+
+            historyContent.innerHTML =
+                lastRoundHistoryHTML;
+
+        }
+
+
+        updateGlobalScores(
+            roundPoints
+        );
+
+    }
+
+
+    // ==========================================
+    // NEXT BUTTON CLICK
+    // ==========================================
 
     if (nextBtn) {
 
-        if (currentSlot < 4) {
+        nextBtn.onclick =
+            showBattleSlot;
 
-            nextBtn.innerHTML =
-                `NEXT → SLOT ${currentSlot + 2}`;
 
-        }
-
-        else {
-
-            nextBtn.innerHTML =
-                "🏁 FINISH ROUND";
-
-        }
+        nextBtn.style.display =
+            'block';
 
     }
 
-}
 
-
-// ==========================================
-// NEXT BATTLE SLOT
-// ==========================================
-
-function nextBattleSlot() {
-
-    const battleRef =
-        db.ref(
-            `rooms/${roomId}/battle_state`
-        );
-
-
-    battleRef.transaction(
-        currentState => {
-
-            if (!currentState) {
-
-                return currentState;
-
-            }
-
-
-            if (
-                currentState.status !==
-                "PLAYING"
-            ) {
-
-                return currentState;
-
-            }
-
-
-            const currentSlot =
-                Number(
-                    currentState.slot || 0
-                );
-
-
-            // ==================================
-            // LAST SLOT
-            // ==================================
-
-            if (
-                currentSlot >= 4
-            ) {
-
-                return {
-
-                    ...currentState,
-
-                    status: "FINISHED",
-
-                    slot: 4
-
-                };
-
-            }
-
-
-            // ==================================
-            // NEXT SLOT
-            // ==================================
-
-            return {
-
-                ...currentState,
-
-                slot:
-                    currentSlot + 1
-
-            };
-
-        }
-    );
+    // FIRST SLOT
+    showBattleSlot();
 
 }
-
 // ==========================================
-// 14. UPDATE GLOBAL SCORES
+// 8. GLOBAL SCORE UPDATE
 // ==========================================
 
 function updateGlobalScores(
     roundPoints
 ) {
 
-    // Only host updates global score.
-    // Otherwise 3 players would each add the points.
-
     if (isRoomCreator) {
 
         db.ref(
             `rooms/${roomId}/global_scores`
-        )
-            .once(
-                "value",
-                snap => {
+        ).once(
+            'value',
+            snap => {
 
-                    const currentScores =
-                        snap.val() || {};
-
-
-                    globalPlayerNames.forEach(
-                        name => {
-
-                            currentScores[name] =
-                                Number(
-                                    currentScores[name] ||
-                                    0
-                                )
-                                +
-                                Number(
-                                    roundPoints[name] ||
-                                    0
-                                );
-
-                        }
-                    );
+                const currentScores =
+                    snap.val() || {};
 
 
-                    db.ref(
-                        `rooms/${roomId}/global_scores`
-                    )
-                        .set(
-                            currentScores
-                        );
+                globalPlayerNames.forEach(
+                    name => {
 
-                }
-            );
+                        currentScores[name] =
+
+                            Number(
+                                currentScores[name] ||
+                                0
+                            )
+
+                            +
+
+                            Number(
+                                roundPoints[name] ||
+                                0
+                            );
+
+                    }
+                );
+
+
+                db.ref(
+                    `rooms/${roomId}/global_scores`
+                ).set(
+                    currentScores
+                );
+
+            }
+        );
 
     }
 
@@ -2032,7 +2026,6 @@ function updateGlobalScores(
             resetRound();
 
         },
-
         2000
     );
 
@@ -2040,55 +2033,46 @@ function updateGlobalScores(
 
 
 // ==========================================
-// 15. GLOBAL SCOREBOARD LISTENER
+// 9. GLOBAL SCORE LISTENER
 // ==========================================
+
+let lastAnnouncedWinner = null;
+
 
 function listenToGlobalScores() {
 
-    if (!roomId) return;
+    if (!roomId) {
+        return;
+    }
 
 
     db.ref(
         `rooms/${roomId}/global_scores`
-    )
-        .on(
-            "value",
-            snap => {
+    ).on(
+        'value',
+        snap => {
 
-                const scores =
-                    snap.val() || {};
-
-
-                // ==================================
-                // FIND LEADER
-                // ==================================
-
-                const scoreValues =
-                    globalPlayerNames.map(
-                        name =>
-                            Number(
-                                scores[name] ||
-                                0
-                            )
-                    );
+            const scores =
+                snap.val() || {};
 
 
-                const maxScore =
-                    scoreValues.length
-                        ? Math.max(
-                            ...scoreValues
+            const values =
+                globalPlayerNames.map(
+                    name =>
+                        Number(
+                            scores[name] || 0
                         )
-                        : 0;
+                );
 
 
-                // ==================================
-                // SCORE TABLE
-                // ==================================
+            const maxScore =
+                values.length
+                    ? Math.max(...values)
+                    : 0;
 
-                let tableHTML = "";
 
-
-                globalPlayerNames.forEach(
+            const rows =
+                globalPlayerNames.map(
                     name => {
 
                         const points =
@@ -2101,64 +2085,43 @@ function listenToGlobalScores() {
                         const progress =
                             Math.min(
                                 100,
-                                (
-                                    points / 25
-                                ) * 100
+                                (points / 25) *
+                                100
                             );
 
 
-                        const isLeader =
+                        const leader =
                             points === maxScore &&
                             points > 0;
 
 
-                        tableHTML += `
+                        return `
 
                             <tr
-                                class="
-                                    ${
-                                        isLeader
-                                            ? "score-leader"
-                                            : ""
-                                    }
-                                "
+                                class="${leader ? 'score-leader' : ''}"
                             >
 
                                 <td>
 
-                                    <div
-                                        class="score-player-name"
-                                    >
+                                    <div class="score-player-name">
 
-                                        <span
-                                            class="player-dot"
-                                        ></span>
+                                        <span class="player-dot"></span>
 
                                         ${name}
 
                                         ${
-                                            isLeader
-                                                ? `
-                                                    <span
-                                                        class="leader-badge"
-                                                    >
-                                                        LEADER
-                                                    </span>
-                                                `
-                                                : ""
+                                            leader
+                                                ? '<span class="leader-badge">LEADER</span>'
+                                                : ''
                                         }
 
                                     </div>
 
 
-                                    <div
-                                        class="mini-progress"
-                                    >
+                                    <div class="mini-progress">
 
                                         <span
-                                            style="
-                                                width:${progress}%
-                                            "
+                                            style="width:${progress}%"
                                         ></span>
 
                                     </div>
@@ -2166,9 +2129,7 @@ function listenToGlobalScores() {
                                 </td>
 
 
-                                <td
-                                    class="score-points"
-                                >
+                                <td class="score-points">
 
                                     ${points}
 
@@ -2183,149 +2144,130 @@ function listenToGlobalScores() {
                         `;
 
                     }
+                ).join('');
+
+
+            const table =
+                document.getElementById(
+                    'score-table'
                 );
 
 
-                const scoreTable =
-                    document.getElementById(
-                        "score-table"
-                    );
+            if (table) {
+
+                table.innerHTML = `
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                PLAYER
+                            </th>
+
+                            <th>
+                                POINTS
+                            </th>
+
+                        </tr>
+
+                    </thead>
 
 
-                if (scoreTable) {
+                    <tbody>
 
-                    scoreTable.innerHTML = `
+                        ${rows}
 
-                        <thead>
+                    </tbody>
 
-                            <tr>
-
-                                <th>
-                                    PLAYER
-                                </th>
-
-                                <th>
-                                    POINTS
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            ${tableHTML}
-
-                        </tbody>
-
-                    `;
-
-                }
-
-
-                // ==================================
-                // LIVE SCOREBOARD
-                // ==================================
-
-                const liveScoreboard =
-                    document.getElementById(
-                        "live-scoreboard"
-                    );
-
-
-                if (liveScoreboard) {
-
-                    let liveHTML = "";
-
-
-                    globalPlayerNames.forEach(
-                        name => {
-
-                            const points =
-                                Number(
-                                    scores[name] ||
-                                    0
-                                );
-
-
-                            liveHTML += `
-
-                                <div
-                                    class="live-score-player"
-                                >
-
-                                    <span>
-                                        ${name}
-                                    </span>
-
-                                    <strong>
-                                        ${points}
-                                    </strong>
-
-                                </div>
-
-                            `;
-
-                        }
-                    );
-
-
-                    liveScoreboard.innerHTML =
-                        liveHTML;
-
-                }
-
-
-                // ==================================
-                // WINNER CHECK
-                // ==================================
-
-                const winner =
-                    globalPlayerNames.find(
-                        name =>
-                            Number(
-                                scores[name] ||
-                                0
-                            ) >= 25
-                    );
-
-
-                if (
-                    winner &&
-                    lastAnnouncedWinner !== winner
-                ) {
-
-                    lastAnnouncedWinner =
-                        winner;
-
-
-                    alert(
-                        `🎉 GAME OVER! ${winner} WINS WITH 25 POINTS! 🎉`
-                    );
-
-                }
+                `;
 
             }
-        );
+
+
+            const live =
+                document.getElementById(
+                    'live-scoreboard'
+                );
+
+
+            if (live) {
+
+                live.innerHTML =
+                    globalPlayerNames.map(
+                        name => `
+
+                            <div
+                                class="live-score-player"
+                            >
+
+                                <span>
+                                    ${name}
+                                </span>
+
+                                <strong>
+                                    ${
+                                        Number(
+                                            scores[name] ||
+                                            0
+                                        )
+                                    }
+                                </strong>
+
+                            </div>
+
+                        `
+                    ).join('');
+
+            }
+
+
+            // ==========================================
+            // GAME OVER
+            // ==========================================
+
+            const winner =
+                globalPlayerNames.find(
+                    name =>
+                        Number(
+                            scores[name] || 0
+                        ) >= 25
+                );
+
+
+            if (
+                winner &&
+                lastAnnouncedWinner !== winner
+            ) {
+
+                lastAnnouncedWinner =
+                    winner;
+
+
+                alert(
+                    `🎉 GAME OVER! ${winner} WINS WITH 25 POINTS! 🎉`
+                );
+
+            }
+
+        }
+    );
 
 }
 
 
 // ==========================================
-// 16. RESET ROUND
+// 10. RESET ROUND
 // ==========================================
 
 function resetRound() {
 
     isBattleRunning =
         false;
-db.ref(
-        `rooms/${roomId}/battle_state`
-    ).remove();
+
 
     playerHandDiv.innerHTML =
-        "";
+        '';
 
 
     slots.forEach(
@@ -2346,110 +2288,93 @@ db.ref(
         "Lock Cards";
 
 
-    // ======================================
-    // PLAYER STATUS BACK TO JOINED
-    // ======================================
-
+    // Player status reset
     db.ref(
         `rooms/${roomId}/players/${playerName}`
-    )
-        .update({
+    ).update({
 
-            status:
-                "JOINED"
+        status:
+            "JOINED"
 
-        });
+    });
 
 
-    // ======================================
-    // HOST DEALS NEXT ROUND
-    // ======================================
-
+    // HOST STARTS NEXT ROUND
     if (isRoomCreator) {
 
         db.ref(
             `rooms/${roomId}/global_scores`
-        )
-            .once(
-                "value",
-                scoreSnap => {
+        ).once(
+            'value',
+            scoreSnap => {
 
-                    const scores =
-                        scoreSnap.val() || {};
-
-
-                    // ==================================
-                    // CHECK GAME WINNER
-                    // ==================================
-
-                    const winner =
-                        globalPlayerNames.find(
-                            name =>
-                                Number(
-                                    scores[name] ||
-                                    0
-                                ) >= 25
-                        );
+                const scores =
+                    scoreSnap.val() || {};
 
 
-                    if (winner) {
-
-                        lockBtn.innerText =
-                            `${winner} WINS!`;
-
-                        return;
-
-                    }
-
-
-                    // ==================================
-                    // DEAL NEXT ROUND
-                    // ==================================
-
-                    setTimeout(
-                        () => {
-
-                            const deck =
-                                shuffleDeck(
-                                    generateDeck()
-                                );
-
-
-                            db.ref(
-                                `rooms/${roomId}/current_round`
-                            )
-                                .set({
-
-                                    p1_cards:
-                                        deck.splice(
-                                            0,
-                                            17
-                                        ),
-
-                                    p2_cards:
-                                        deck.splice(
-                                            0,
-                                            17
-                                        ),
-
-                                    p3_cards:
-                                        deck.splice(
-                                            0,
-                                            17
-                                        ),
-
-                                    center_card:
-                                        deck[0]
-
-                                });
-
-                        },
-
-                        1000
+                const winner =
+                    globalPlayerNames.find(
+                        name =>
+                            Number(
+                                scores[name] || 0
+                            ) >= 25
                     );
 
+
+                if (winner) {
+
+                    document.getElementById(
+                        'lock-btn'
+                    ).innerText =
+                        `${winner} WINS!`;
+
+                    return;
+
                 }
-            );
+
+
+                setTimeout(
+                    () => {
+
+                        let deck =
+                            shuffleDeck(
+                                generateDeck()
+                            );
+
+
+                        db.ref(
+                            `rooms/${roomId}/current_round`
+                        ).set({
+
+                            p1_cards:
+                                deck.splice(
+                                    0,
+                                    17
+                                ),
+
+                            p2_cards:
+                                deck.splice(
+                                    0,
+                                    17
+                                ),
+
+                            p3_cards:
+                                deck.splice(
+                                    0,
+                                    17
+                                ),
+
+                            center_card:
+                                deck[0]
+
+                        });
+
+                    },
+                    1000
+                );
+
+            }
+        );
 
     }
 
@@ -2457,141 +2382,56 @@ db.ref(
 
 
 // ==========================================
-// 17. SCOREBOARD MODAL
+// 11. SCORE MODAL
 // ==========================================
 
-const showScoreBtn =
+document.getElementById(
+    'show-score-btn'
+).onclick = () => {
+
     document.getElementById(
-        "show-score-btn"
-    );
+        'scoreboard-modal'
+    ).style.display =
+        'block';
+
+};
 
 
-const closeScoreBtn =
+document.getElementById(
+    'close-score'
+).onclick = () => {
+
     document.getElementById(
-        "close-score"
-    );
+        'scoreboard-modal'
+    ).style.display =
+        'none';
 
-
-const scoreboardModal =
-    document.getElementById(
-        "scoreboard-modal"
-    );
-
-
-if (showScoreBtn) {
-
-    showScoreBtn.onclick = () => {
-
-        if (scoreboardModal) {
-
-            scoreboardModal.style.display =
-                "block";
-
-        }
-
-    };
-
-}
-
-
-if (closeScoreBtn) {
-
-    closeScoreBtn.onclick = () => {
-
-        if (scoreboardModal) {
-
-            scoreboardModal.style.display =
-                "none";
-
-        }
-
-    };
-
-}
+};
 
 
 // ==========================================
-// 18. HISTORY MODAL
+// 12. HISTORY MODAL
 // ==========================================
 
-const showHistoryBtn =
+document.getElementById(
+    'show-history-btn'
+).onclick = () => {
+
     document.getElementById(
-        "show-history-btn"
-    );
+        'history-modal'
+    ).style.display =
+        'block';
+
+};
 
 
-const closeHistoryBtn =
+document.getElementById(
+    'close-history'
+).onclick = () => {
+
     document.getElementById(
-        "close-history"
-    );
+        'history-modal'
+    ).style.display =
+        'none';
 
-
-const historyModal =
-    document.getElementById(
-        "history-modal"
-    );
-
-
-if (showHistoryBtn) {
-
-    showHistoryBtn.onclick = () => {
-
-        if (historyModal) {
-
-            historyModal.style.display =
-                "block";
-
-        }
-
-    };
-
-}
-
-
-if (closeHistoryBtn) {
-
-    closeHistoryBtn.onclick = () => {
-
-        if (historyModal) {
-
-            historyModal.style.display =
-                "none";
-
-        }
-
-    };
-
-}
-
-
-// ==========================================
-// 19. CLOSE MODALS ON OUTSIDE CLICK
-// ==========================================
-
-window.addEventListener(
-    "click",
-    event => {
-
-        if (
-            event.target ===
-            scoreboardModal
-        ) {
-
-            scoreboardModal.style.display =
-                "none";
-
-        }
-
-
-        if (
-            event.target ===
-            historyModal
-        ) {
-
-            historyModal.style.display =
-                "none";
-
-        }
-
-    }
-);
+};
