@@ -1249,21 +1249,315 @@ lockBtn.addEventListener(
 // 13. BATTLE ANIMATION
 // ==========================================
 
-function startBattleAnimation(
-    playersData
-) {
+// ==========================================
+// 13. MANUAL BATTLE SYSTEM
+// ==========================================
+//
+// Ab fight automatic timer se nahi chalegi.
+//
+// User NEXT button dabayega.
+// Firebase battle_state ke through
+// 3 players ko same slot/same result dikhega.
+//
+// ==========================================
+
+let battleListenerAttached = false;
+
+let battleHistoryHTML = "";
+
+let battleFinishedHandled = false;
+
+
+// ==========================================
+// START BATTLE
+// ==========================================
+
+function startBattleAnimation(playersData) {
 
     if (isBattleRunning) return;
 
-
     isBattleRunning = true;
+
+    battleFinishedHandled = false;
+
+    battleHistoryHTML = "";
 
 
     const battleArena =
-        document.getElementById(
-            "battle-arena"
+        document.getElementById("battle-arena");
+
+    const battleTitle =
+        document.getElementById("battle-title");
+
+    const battleCards =
+        document.getElementById("battle-cards");
+
+    const battleWinner =
+        document.getElementById("battle-winner");
+
+    const nextBtn =
+        document.getElementById("battle-next-btn");
+
+
+    if (battleArena) {
+
+        battleArena.style.display = "block";
+
+    }
+
+
+    // ======================================
+    // ATTACH FIREBASE BATTLE LISTENER
+    // ======================================
+
+    if (!battleListenerAttached) {
+
+        battleListenerAttached = true;
+
+
+        db.ref(
+            `rooms/${roomId}/battle_state`
+        )
+        .on(
+            "value",
+            snapshot => {
+
+                const battleState =
+                    snapshot.val();
+
+
+                // No battle yet
+                if (!battleState) {
+
+                    return;
+
+                }
+
+
+                // ==================================
+                // GAME FINISHED
+                // ==================================
+
+                if (
+                    battleState.status ===
+                    "FINISHED"
+                ) {
+
+                    if (battleArena) {
+
+                        battleArena.style.display =
+                            "none";
+
+                    }
+
+
+                    // Prevent duplicate score update
+                    if (
+                        battleFinishedHandled
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    battleFinishedHandled =
+                        true;
+
+
+                    // ==================================
+                    // CALCULATE ALL 5 WINNERS
+                    // ==================================
+
+                    const roundPoints = {};
+
+
+                    globalPlayerNames.forEach(
+                        name => {
+
+                            roundPoints[name] =
+                                0;
+
+                        }
+                    );
+
+
+                    for (
+                        let slotIndex = 0;
+                        slotIndex < 5;
+                        slotIndex++
+                    ) {
+
+                        let winner = null;
+
+                        let highestScore = -1;
+
+
+                        globalPlayerNames.forEach(
+                            name => {
+
+                                const slotData =
+                                    playersData[name]
+                                        .lockedSlots[
+                                            slotIndex
+                                        ];
+
+
+                                if (!slotData) return;
+
+
+                                if (
+                                    slotData.score >
+                                    highestScore
+                                ) {
+
+                                    highestScore =
+                                        slotData.score;
+
+                                    winner =
+                                        name;
+
+                                }
+
+                            }
+                        );
+
+
+                        if (winner) {
+
+                            roundPoints[winner] += 1;
+
+                        }
+
+                    }
+
+
+                    // ==================================
+                    // HISTORY SAVE
+                    // ==================================
+
+                    const historyContent =
+                        document.getElementById(
+                            "history-content"
+                        );
+
+
+                    if (historyContent) {
+
+                        historyContent.innerHTML =
+                            battleHistoryHTML;
+
+                    }
+
+
+                    // ==================================
+                    // UPDATE SCORE
+                    // ==================================
+
+                    updateGlobalScores(
+                        roundPoints
+                    );
+
+
+                    return;
+
+                }
+
+
+                // ==================================
+                // CURRENT SLOT
+                // ==================================
+
+                const currentSlot =
+                    Number(
+                        battleState.slot || 0
+                    );
+
+
+                renderBattleSlot(
+                    playersData,
+                    currentSlot
+                );
+
+
+            }
         );
 
+    }
+
+
+    // ======================================
+    // HOST INITIALIZES BATTLE
+    // ======================================
+
+    if (isRoomCreator) {
+
+        db.ref(
+            `rooms/${roomId}/battle_state`
+        )
+        .once(
+            "value",
+            snapshot => {
+
+                const existingState =
+                    snapshot.val();
+
+
+                // Agar already battle running hai
+                if (
+                    existingState &&
+                    existingState.status ===
+                    "PLAYING"
+                ) {
+
+                    return;
+
+                }
+
+
+                db.ref(
+                    `rooms/${roomId}/battle_state`
+                )
+                .set({
+
+                    status: "PLAYING",
+
+                    slot: 0
+
+                });
+
+            }
+        );
+
+    }
+
+
+    // ======================================
+    // NEXT BUTTON
+    // ======================================
+
+    if (nextBtn) {
+
+        nextBtn.onclick =
+            () => {
+
+                nextBattleSlot();
+
+            };
+
+    }
+
+}
+
+
+// ==========================================
+// RENDER CURRENT BATTLE SLOT
+// ==========================================
+
+function renderBattleSlot(
+    playersData,
+    currentSlot
+) {
 
     const battleTitle =
         document.getElementById(
@@ -1283,277 +1577,229 @@ function startBattleAnimation(
         );
 
 
-    if (battleArena) {
+    const nextBtn =
+        document.getElementById(
+            "battle-next-btn"
+        );
 
-        battleArena.style.display =
-            "block";
+
+    const stepNumber =
+        document.getElementById(
+            "battle-step-number"
+        );
+
+
+    if (battleTitle) {
+
+        battleTitle.innerText =
+            `SLOT ${currentSlot + 1}`;
 
     }
 
 
-    let currentSlot = 0;
+    if (stepNumber) {
+
+        stepNumber.innerText =
+            currentSlot + 1;
+
+    }
 
 
-    const roundPoints = {};
+    if (battleCards) {
+
+        battleCards.innerHTML =
+            "";
+
+    }
+
+
+    if (battleWinner) {
+
+        battleWinner.innerHTML =
+            "";
+
+    }
+
+
+    // ======================================
+    // FIND SLOT WINNER
+    // ======================================
+
+    let slotWinner = null;
+
+    let highestScore = -1;
+
+
+    let slotCardsHTML = "";
 
 
     globalPlayerNames.forEach(
         name => {
 
-            roundPoints[name] = 0;
+            const slotData =
+                playersData[name]
+                    .lockedSlots[
+                        currentSlot
+                    ];
 
-        }
-    );
 
+            if (
+                !slotData ||
+                !slotData.cards
+            ) {
 
-    let lastRoundHistoryHTML = "";
+                return;
 
+            }
 
-    const battleInterval =
-        setInterval(
-            () => {
 
+            const c1 =
+                slotData.cards[0];
 
-                // ==================================
-                // ALL 5 SLOTS COMPLETE
-                // ==================================
+            const c2 =
+                slotData.cards[1];
 
-                if (currentSlot > 4) {
+            const c3 =
+                slotData.cards[2];
 
-                    clearInterval(
-                        battleInterval
-                    );
 
+            const r1 =
+                rankNames[c1.rank] ||
+                c1.rank;
 
-                    if (battleArena) {
+            const r2 =
+                rankNames[c2.rank] ||
+                c2.rank;
 
-                        battleArena.style.display =
-                            "none";
+            const r3 =
+                rankNames[c3.rank] ||
+                c3.rank;
 
-                    }
 
+            const s1 =
+                suitSymbols[c1.suit];
 
-                    const historyContent =
-                        document.getElementById(
-                            "history-content"
-                        );
+            const s2 =
+                suitSymbols[c2.suit];
 
+            const s3 =
+                suitSymbols[c3.suit];
 
-                    if (historyContent) {
 
-                        historyContent.innerHTML =
-                            lastRoundHistoryHTML;
+            const cardString =
+                `${r1}${s1} ${r2}${s2} ${r3}${s3}`;
 
-                    }
 
+            // ==================================
+            // FIND WINNER
+            // ==================================
 
-                    updateGlobalScores(
-                        roundPoints
-                    );
+            if (
+                slotData.score >
+                highestScore
+            ) {
 
+                highestScore =
+                    slotData.score;
 
-                    return;
+                slotWinner =
+                    name;
 
-                }
+            }
 
 
-                let slotWinner = null;
+            // ==================================
+            // BATTLE CARD UI
+            // ==================================
 
-                let highestScore = -1;
+            if (battleCards) {
 
-
-                let slotCardsHTML = "";
-
-
-                if (battleCards) {
-
-                    battleCards.innerHTML =
-                        "";
-
-                }
-
-
-                if (battleTitle) {
-
-                    battleTitle.innerText =
-                        `Fighting: SLOT ${currentSlot + 1}`;
-
-                }
-
-
-                // ==================================
-                // 3 PLAYERS FIGHT
-                // ==================================
-
-                globalPlayerNames.forEach(
-                    name => {
-
-                        const slotData =
-                            playersData[name]
-                                .lockedSlots[
-                                    currentSlot
-                                ];
-
-
-                        if (
-                            !slotData ||
-                            !slotData.cards
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        const c1 =
-                            slotData.cards[0];
-
-                        const c2 =
-                            slotData.cards[1];
-
-                        const c3 =
-                            slotData.cards[2];
-
-
-                        const r1 =
-                            rankNames[c1.rank] ||
-                            c1.rank;
-
-                        const r2 =
-                            rankNames[c2.rank] ||
-                            c2.rank;
-
-                        const r3 =
-                            rankNames[c3.rank] ||
-                            c3.rank;
-
-
-                        const s1 =
-                            suitSymbols[c1.suit];
-
-                        const s2 =
-                            suitSymbols[c2.suit];
-
-                        const s3 =
-                            suitSymbols[c3.suit];
-
-
-                        const cardString =
-                            `${r1}${s1} | ${r2}${s2} | ${r3}${s3}`;
-
-
-                        // ==================================
-                        // BATTLE SCREEN
-                        // ==================================
-
-                        if (battleCards) {
-
-                            battleCards.innerHTML += `
-
-                                <div
-                                    style="
-                                        display:inline-block;
-                                        margin:15px;
-                                        padding:10px;
-                                        background:#fff;
-                                        color:#000;
-                                        border-radius:8px;
-                                        min-width:140px;
-                                    "
-                                >
-
-                                    <strong>
-                                        ${name}
-                                    </strong>
-
-                                    <br>
-
-                                    ${cardString}
-
-                                </div>
-
-                            `;
-
-                        }
-
-
-                        // ==================================
-                        // HISTORY
-                        // ==================================
-
-                        slotCardsHTML += `
-
-                            <div class="history-player">
-
-                                <strong>
-                                    ${name}
-                                </strong>
-
-                                <br>
-
-                                ${cardString}
-
-                            </div>
-
-                        `;
-
-
-                        // ==================================
-                        // FIND WINNER
-                        // ==================================
-
-                        if (
-                            slotData.score >
-                            highestScore
-                        ) {
-
-                            highestScore =
-                                slotData.score;
-
-                            slotWinner =
-                                name;
-
-                        }
-
-                    }
-                );
-
-
-                // ==================================
-                // HISTORY ROW
-                // ==================================
-
-                lastRoundHistoryHTML += `
+                battleCards.innerHTML += `
 
                     <div
-                        style="
-                            background:#1a252f;
-                            margin-bottom:15px;
-                            padding:10px;
-                            border-radius:8px;
-                            border:1px solid #7f8c8d;
-                        "
+                        class="battle-player-card"
                     >
 
-                        <h4
-                            style="
-                                margin:0 0 10px 0;
-                                color:#f1c40f;
-                            "
+                        <div
+                            class="battle-player-name"
                         >
 
-                            Slot ${currentSlot + 1}
+                            ${name}
 
-                            -
+                        </div>
 
-                            Winner:
-                            🎉 ${slotWinner}
 
-                        </h4>
+                        <div
+                            class="battle-playing-cards"
+                        >
 
-                        <div class="history-row">
+                            <div
+                                class="
+                                    battle-single-card
+                                    ${
+                                        (
+                                            c1.suit ===
+                                            "Hearts" ||
+                                            c1.suit ===
+                                            "Diamonds"
+                                        )
+                                            ? "red"
+                                            : "black"
+                                    }
+                                "
+                            >
+                                ${r1}
+                                <span>${s1}</span>
+                            </div>
 
-                            ${slotCardsHTML}
+
+                            <div
+                                class="
+                                    battle-single-card
+                                    ${
+                                        (
+                                            c2.suit ===
+                                            "Hearts" ||
+                                            c2.suit ===
+                                            "Diamonds"
+                                        )
+                                            ? "red"
+                                            : "black"
+                                    }
+                                "
+                            >
+                                ${r2}
+                                <span>${s2}</span>
+                            </div>
+
+
+                            <div
+                                class="
+                                    battle-single-card
+                                    ${
+                                        (
+                                            c3.suit ===
+                                            "Hearts" ||
+                                            c3.suit ===
+                                            "Diamonds"
+                                        )
+                                            ? "red"
+                                            : "black"
+                                    }
+                                "
+                            >
+                                ${r3}
+                                <span>${s3}</span>
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="battle-combination"
+                        >
+
+                            ${cardString}
 
                         </div>
 
@@ -1561,35 +1807,197 @@ function startBattleAnimation(
 
                 `;
 
-
-                if (battleWinner) {
-
-                    battleWinner.innerText =
-                        `🎉 ${slotWinner} wins Slot ${currentSlot + 1}!`;
-
-                }
+            }
 
 
-                // ==================================
-                // GIVE 1 POINT
-                // ==================================
+            // ==================================
+            // HISTORY
+            // ==================================
 
-                if (slotWinner) {
+            slotCardsHTML += `
 
-                    roundPoints[slotWinner] += 1;
+                <div class="history-player">
 
-                }
+                    <strong>
+                        ${name}
+                    </strong>
+
+                    <br>
+
+                    <span>
+                        ${cardString}
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+    );
 
 
-                currentSlot++;
+    // ======================================
+    // SHOW WINNER
+    // ======================================
 
-            },
+    if (battleWinner) {
 
-            3000
-        );
+        battleWinner.innerHTML = `
+
+            <div class="battle-result">
+
+                🏆
+
+                <strong>
+                    ${slotWinner}
+                </strong>
+
+                wins this round
+
+                <span>
+                    +1 POINT
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    // ======================================
+    // ADD TO HISTORY
+    // ======================================
+
+    battleHistoryHTML += `
+
+        <div class="history-battle-round">
+
+            <div class="history-round-header">
+
+                <strong>
+                    SLOT ${currentSlot + 1}
+                </strong>
+
+                <span>
+                    🏆 ${slotWinner}
+                </span>
+
+            </div>
+
+
+            <div class="history-row">
+
+                ${slotCardsHTML}
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // ======================================
+    // NEXT BUTTON
+    // ======================================
+
+    if (nextBtn) {
+
+        if (currentSlot < 4) {
+
+            nextBtn.innerHTML =
+                `NEXT → SLOT ${currentSlot + 2}`;
+
+        }
+
+        else {
+
+            nextBtn.innerHTML =
+                "🏁 FINISH ROUND";
+
+        }
+
+    }
 
 }
 
+
+// ==========================================
+// NEXT BATTLE SLOT
+// ==========================================
+
+function nextBattleSlot() {
+
+    const battleRef =
+        db.ref(
+            `rooms/${roomId}/battle_state`
+        );
+
+
+    battleRef.transaction(
+        currentState => {
+
+            if (!currentState) {
+
+                return currentState;
+
+            }
+
+
+            if (
+                currentState.status !==
+                "PLAYING"
+            ) {
+
+                return currentState;
+
+            }
+
+
+            const currentSlot =
+                Number(
+                    currentState.slot || 0
+                );
+
+
+            // ==================================
+            // LAST SLOT
+            // ==================================
+
+            if (
+                currentSlot >= 4
+            ) {
+
+                return {
+
+                    ...currentState,
+
+                    status: "FINISHED",
+
+                    slot: 4
+
+                };
+
+            }
+
+
+            // ==================================
+            // NEXT SLOT
+            // ==================================
+
+            return {
+
+                ...currentState,
+
+                slot:
+                    currentSlot + 1
+
+            };
+
+        }
+    );
+
+}
 
 // ==========================================
 // 14. UPDATE GLOBAL SCORES
@@ -1940,7 +2348,9 @@ function resetRound() {
 
     isBattleRunning =
         false;
-
+db.ref(
+        `rooms/${roomId}/battle_state`
+    ).remove();
 
     playerHandDiv.innerHTML =
         "";
