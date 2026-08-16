@@ -74,13 +74,52 @@
             <div class="avatar" id="opp2-avatar">⏳ Wait...</div>
         </div>
 
-        <!-- Battle Arena (Animation ke liye) -->
-        <div id="battle-arena" style="display: none;">
-            <h2 id="battle-title">Slot 1 Fight!</h2>
-            <div id="battle-cards"></div>
-            <h3 id="battle-winner"></h3>
+        <!-- ==========================================
+     BATTLE ARENA
+     ========================================== -->
+
+<div id="battle-arena" style="display: none;">
+
+    <div class="battle-header">
+
+        <div>
+            <div class="battle-small-title">
+                PACHISA • BATTLE
+            </div>
+
+            <h2 id="battle-title">
+                SLOT 1
+            </h2>
         </div>
 
+        <div class="battle-step">
+            <span id="battle-step-number">1</span>
+            <small>/ 5</small>
+        </div>
+
+    </div>
+
+
+    <div id="battle-cards">
+        <!-- Cards JS se aayenge -->
+    </div>
+
+
+    <div id="battle-winner">
+        <!-- Winner JS se aayega -->
+    </div>
+
+
+    <!-- USER CONTROL -->
+    <button
+        id="battle-next-btn"
+        class="battle-next-btn"
+        type="button"
+    >
+        👆 TAP TO REVEAL
+    </button>
+
+</div>
         <!-- 5 Slots for the Current Player -->
         <div id="slots-area">
             <div class="slot" id="slot-1" data-slot="1">Slot 1</div>
