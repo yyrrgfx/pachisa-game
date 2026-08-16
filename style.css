@@ -806,3 +806,723 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
     }
 
 }
+/* =========================================================
+   PACHISA FINAL BATTLE + CARD UI
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   BATTLE POPUP
+   --------------------------------------------------------- */
+
+#battle-arena {
+
+    position: fixed;
+
+    top: 3vh;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: min(94vw, 900px);
+
+    height: 90vh;
+
+    max-height: 90vh;
+
+    box-sizing: border-box;
+
+    z-index: 9999;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    padding: 18px;
+
+    border-radius: 22px;
+
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(31, 112, 72, .98),
+            rgba(3, 20, 14, .99)
+        );
+
+    border:
+        1px solid
+        rgba(255, 215, 130, .28);
+
+    box-shadow:
+        0 30px 100px
+        rgba(0,0,0,.8);
+
+}
+
+
+/* Header never scrolls */
+
+#battle-arena .battle-header {
+
+    flex-shrink: 0;
+
+}
+
+
+/* Cards area becomes scrollable */
+
+#battle-cards {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    padding: 8px 6px 18px;
+
+    margin: 8px 0;
+
+    -webkit-overflow-scrolling: touch;
+
+}
+
+
+/* Scrollbar */
+
+#battle-cards::-webkit-scrollbar {
+
+    width: 7px;
+
+}
+
+#battle-cards::-webkit-scrollbar-track {
+
+    background:
+        rgba(255,255,255,.04);
+
+    border-radius: 10px;
+
+}
+
+#battle-cards::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(241,196,15,.55);
+
+    border-radius: 10px;
+
+}
+
+
+/* Winner stays visible */
+
+#battle-winner {
+
+    flex-shrink: 0;
+
+    text-align: center;
+
+    margin: 8px 0;
+
+}
+
+
+/* NEXT BUTTON ALWAYS VISIBLE */
+
+#battle-next-btn {
+
+    flex-shrink: 0;
+
+    position: relative;
+
+    z-index: 10;
+
+    width: 100%;
+
+    max-width: 430px;
+
+    margin: 8px auto 0;
+
+    padding: 15px 20px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f1c40f,
+            #e67e22
+        );
+
+    color: #161616;
+
+    font-size: 1rem;
+
+    font-weight: 900;
+
+    letter-spacing: .4px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,0,0,.4);
+
+}
+
+
+#battle-next-btn:active {
+
+    transform: scale(.97);
+
+}
+
+
+/* ---------------------------------------------------------
+   BATTLE PLAYER CARDS
+   --------------------------------------------------------- */
+
+#battle-cards {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 14px;
+
+}
+
+
+.battle-player-card {
+
+    padding: 14px 10px;
+
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.13),
+            rgba(0,0,0,.28)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,0,0,.35);
+
+}
+
+
+/* ---------------------------------------------------------
+   FANCY PLAYING CARDS
+   --------------------------------------------------------- */
+
+.battle-playing-cards {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    perspective: 800px;
+
+}
+
+
+.battle-single-card {
+
+    position: relative;
+
+    width: 62px;
+
+    height: 88px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #eeeeee
+        );
+
+    border-radius: 10px;
+
+    border:
+        1px solid
+        rgba(0,0,0,.12);
+
+    color: #171717;
+
+    font-size: 1.55rem;
+
+    font-weight: 900;
+
+    box-shadow:
+        0 7px 15px
+        rgba(0,0,0,.35);
+
+    transform:
+        rotateX(0deg)
+        rotateY(0deg);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+
+}
+
+
+.battle-single-card:hover {
+
+    transform:
+        translateY(-5px)
+        rotate(-2deg);
+
+    box-shadow:
+        0 12px 22px
+        rgba(0,0,0,.45);
+
+}
+
+
+.battle-single-card span {
+
+    font-size: 1.2rem;
+
+}
+
+
+/* ---------------------------------------------------------
+   MAIN PLAYER HAND
+   --------------------------------------------------------- */
+
+#player-hand {
+
+    position: relative;
+
+    min-height: 135px;
+
+    padding: 18px 10px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.075),
+            rgba(0,0,0,.20)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+}
+
+
+/* Card grouping */
+
+.hand-suit-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 9px;
+
+    margin: 5px 3px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+
+}
+
+
+/* Suit label */
+
+.suit-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 25px;
+
+    height: 25px;
+
+    margin-right: 3px;
+
+    border-radius: 7px;
+
+    background:
+        rgba(255,255,255,.08);
+
+    font-size: .9rem;
+
+}
+
+
+/* ---------------------------------------------------------
+   FANCY PLAYER HAND CARD
+   --------------------------------------------------------- */
+
+.hand-card {
+
+    position: relative;
+
+    width: 54px;
+
+    height: 78px;
+
+    margin: 4px;
+
+    display: inline-flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f1f1f1
+        );
+
+    border-radius: 9px;
+
+    border:
+        1px solid
+        rgba(0,0,0,.14);
+
+    color: #111;
+
+    font-size: 1.25rem;
+
+    font-weight: 900;
+
+    cursor: grab;
+
+    box-shadow:
+        0 5px 12px
+        rgba(0,0,0,.35);
+
+    opacity: 1;
+
+    transform:
+        translateY(0)
+        rotate(0deg);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+
+}
+
+
+.hand-card:hover {
+
+    transform:
+        translateY(-8px)
+        rotate(-2deg);
+
+    box-shadow:
+        0 12px 22px
+        rgba(0,0,0,.4);
+
+}
+
+
+.hand-card:active {
+
+    cursor: grabbing;
+
+}
+
+
+/* Flying card animation */
+
+.hand-card.dealing {
+
+    animation:
+        cardDealIn
+        .42s
+        cubic-bezier(.2,.8,.3,1)
+        both;
+
+}
+
+
+@keyframes cardDealIn {
+
+    0% {
+
+        opacity: 0;
+
+        transform:
+            translate(
+                0,
+                -110px
+            )
+            scale(.45)
+            rotate(
+                -18deg
+            );
+
+    }
+
+    65% {
+
+        opacity: 1;
+
+        transform:
+            translate(
+                0,
+                8px
+            )
+            scale(1.05)
+            rotate(
+                3deg
+            );
+
+    }
+
+    100% {
+
+        opacity: 1;
+
+        transform:
+            translate(
+                0,
+                0
+            )
+            scale(1)
+            rotate(0deg);
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   SUIT COLORS
+   --------------------------------------------------------- */
+
+.hand-card.red {
+
+    color: #d63031;
+
+}
+
+.hand-card.black {
+
+    color: #171717;
+
+}
+
+
+/* ---------------------------------------------------------
+   PREVIOUS ROUND MODAL
+   --------------------------------------------------------- */
+
+#history-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 10000;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    padding:
+        20px 0;
+
+    box-sizing: border-box;
+
+    -webkit-overflow-scrolling:
+        touch;
+
+}
+
+
+/* Modal content */
+
+#history-modal .modal-content {
+
+    position: relative;
+
+    width: min(92vw, 900px);
+
+    max-width: 900px;
+
+    min-height: 200px;
+
+    max-height:
+        calc(100vh - 50px);
+
+    margin:
+        20px auto;
+
+    box-sizing: border-box;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    padding: 20px;
+
+    border-radius: 20px;
+
+}
+
+
+/* Modal internal scrollbar */
+
+#history-modal .modal-content::-webkit-scrollbar {
+
+    width: 7px;
+
+}
+
+#history-modal .modal-content::-webkit-scrollbar-track {
+
+    background:
+        rgba(255,255,255,.04);
+
+}
+
+#history-modal .modal-content::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(241,196,15,.55);
+
+    border-radius: 10px;
+
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 700px) {
+
+    #battle-arena {
+
+        top: 1.5vh;
+
+        width: 94vw;
+
+        height: 94vh;
+
+        max-height: 94vh;
+
+        padding: 12px;
+
+        border-radius: 18px;
+
+    }
+
+
+    #battle-cards {
+
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+    }
+
+
+    .battle-player-card {
+
+        padding: 12px;
+
+    }
+
+
+    .battle-single-card {
+
+        width: 58px;
+
+        height: 82px;
+
+    }
+
+
+    #battle-next-btn {
+
+        padding: 14px;
+
+        font-size: .95rem;
+
+    }
+
+
+    #history-modal {
+
+        padding: 5px 0;
+
+    }
+
+
+    #history-modal .modal-content {
+
+        width: 94vw;
+
+        max-height:
+            calc(100vh - 20px);
+
+        margin: 10px auto;
+
+        padding: 14px;
+
+    }
+
+
+    .hand-card {
+
+        width: 48px;
+
+        height: 70px;
+
+        font-size: 1.1rem;
+
+    }
+
+}
