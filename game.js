@@ -814,6 +814,11 @@ function getHandScore(cards) {
 //
 // ==========================================
 
+// ==========================================
+// RENDER PLAYER HAND
+// SIMPLE COMPACT HORIZONTAL HAND
+// ==========================================
+
 function renderPlayerHand(cardsArray) {
 
     playerHandDiv.innerHTML = "";
@@ -822,300 +827,119 @@ function renderPlayerHand(cardsArray) {
         return;
     }
 
+    // IMPORTANT:
+    // Card order exactly same rahega.
+    // Koi suit grouping / sorting nahi.
 
-    // ======================================
-    // SUIT ORDER
-    // ======================================
+    cardsArray.forEach((card, index) => {
 
-    const suitOrder = [
-        "Spades",
-        "Hearts",
-        "Diamonds",
-        "Clubs"
-    ];
+        const cardEl =
+            document.createElement("div");
 
-
-    // ======================================
-    // GROUP CARDS BY SUIT
-    // ======================================
-
-    const groupedCards = {
-
-        Spades: [],
-        Hearts: [],
-        Diamonds: [],
-        Clubs: []
-
-    };
-
-
-    cardsArray.forEach(card => {
-
-        if (
-            groupedCards[card.suit]
-        ) {
-
-            groupedCards[card.suit].push(
-                card
-            );
-
-        }
-
-    });
-
-
-    // ======================================
-    // SORT EACH SUIT
-    // BIGGEST CARD FIRST
-    // ======================================
-
-    suitOrder.forEach(suit => {
-
-        groupedCards[suit].sort(
-            (a, b) =>
-                b.rank - a.rank
+        cardEl.classList.add(
+            "card",
+            "hand-card",
+            "dealing"
         );
 
-    });
-
-
-    // ======================================
-    // CREATE SUIT GROUPS
-    // ======================================
-
-    let animationIndex = 0;
-
-
-    suitOrder.forEach(suit => {
-
-        const cards =
-            groupedCards[suit];
-
-
-        if (!cards.length) {
-            return;
-        }
-
-
-        // ==================================
-        // SUIT CONTAINER
-        // ==================================
-
-        const group =
-            document.createElement(
-                "div"
-            );
-
-
-        group.className =
-            "hand-suit-group";
-
-
-        group.dataset.suit =
-            suit;
-
-
-        // ==================================
-        // SUIT LABEL
-        // ==================================
-
-        const suitLabel =
-            document.createElement(
-                "div"
-            );
-
-
-        suitLabel.className =
-            "suit-label";
-
-
-        suitLabel.innerText =
-            suitSymbols[suit];
-
-
+        // Red / Black
         if (
-            suit === "Hearts" ||
-            suit === "Diamonds"
+            card.suit === "Hearts" ||
+            card.suit === "Diamonds"
         ) {
 
-            suitLabel.style.color =
-                "#e74c3c";
+            cardEl.classList.add("red");
+
+        } else {
+
+            cardEl.classList.add("black");
 
         }
 
-        else {
+        const displayRank =
+            rankNames[card.rank] ||
+            card.rank;
 
-            suitLabel.style.color =
-                "#111";
+        // Card design
+        cardEl.innerHTML = `
+            <div class="card-rank">
+                ${displayRank}
+            </div>
 
-        }
+            <div class="card-suit">
+                ${suitSymbols[card.suit]}
+            </div>
+        `;
+
+        cardEl.dataset.suit =
+            card.suit;
+
+        cardEl.dataset.rank =
+            card.rank;
+
+        cardEl.dataset.id =
+            `card-${index}`;
+
+        cardEl.setAttribute(
+            "draggable",
+            "true"
+        );
+
+        // ==================================
+        // ONE BY ONE DEAL ANIMATION
+        // ==================================
+
+        cardEl.style.animationDelay =
+            `${index * 90}ms`;
 
 
-        group.appendChild(
-            suitLabel
+        // ==================================
+        // DRAG START
+        // ==================================
+
+        cardEl.addEventListener(
+            "dragstart",
+            function () {
+
+                draggedCard = this;
+
+                this.classList.add(
+                    "dragging-card"
+                );
+
+            }
         );
 
 
         // ==================================
-        // CARDS
+        // DRAG END
         // ==================================
 
-        cards.forEach(
-            (card, cardIndex) => {
+        cardEl.addEventListener(
+            "dragend",
+            function () {
 
-                const cardEl =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                cardEl.classList.add(
-                    "card",
-                    "hand-card",
-                    "dealing"
+                this.classList.remove(
+                    "dragging-card"
                 );
 
+                draggedCard = null;
 
-                if (
-                    card.suit === "Hearts" ||
-                    card.suit === "Diamonds"
-                ) {
-
-                    cardEl.classList.add(
-                        "red"
-                    );
-
-                }
-
-                else {
-
-                    cardEl.classList.add(
-                        "black"
-                    );
-
-                }
-
-
-                const displayRank =
-                    rankNames[card.rank] ||
-                    card.rank;
-
-
-                cardEl.innerHTML = `
-
-                    <div>
-                        ${displayRank}
-                    </div>
-
-                    <div>
-                        ${suitSymbols[card.suit]}
-                    </div>
-
-                `;
-
-
-                cardEl.dataset.suit =
-                    card.suit;
-
-
-                cardEl.dataset.rank =
-                    card.rank;
-
-
-                cardEl.dataset.id =
-                    `card-${animationIndex}`;
-
-
-                cardEl.setAttribute(
-                    "draggable",
-                    "true"
-                );
-
-
-                // ==================================
-                // DEAL DELAY
-                // ==================================
-
-                cardEl.style.animationDelay =
-                    `${animationIndex * 90}ms`;
-
-
-                // ==================================
-                // DRAG START
-                // ==================================
-
-                cardEl.addEventListener(
-                    "dragstart",
-                    function () {
-
-                        draggedCard =
-                            this;
-
-
-                        setTimeout(
-                            () => {
-
-                                this.style.opacity =
-                                    "0.5";
-
-                            },
-                            0
-                        );
-
-                    }
-                );
-
-
-                // ==================================
-                // DRAG END
-                // ==================================
-
-                cardEl.addEventListener(
-                    "dragend",
-                    function () {
-
-                        this.style.opacity =
-                            "1";
-
-
-                        draggedCard =
-                            null;
-
-
-                        validateSlots();
-
-                    }
-                );
-
-
-                group.appendChild(
-                    cardEl
-                );
-
-
-                animationIndex++;
+                validateSlots();
 
             }
         );
 
 
         playerHandDiv.appendChild(
-            group
+            cardEl
         );
 
     });
 
 
-    // ======================================
-    // SETUP DRAG & DROP
-    // ======================================
-
+    // Drag & Drop
     setupDragAndDrop();
-
-
-    // ======================================
-    // VALIDATE
-    // ======================================
 
     validateSlots();
 
