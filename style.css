@@ -816,49 +816,26 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
    --------------------------------------------------------- */
 
 #battle-arena {
+    position: fixed !important;
+    top: 3vh !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: min(94vw, 900px) !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important;
 
-    position: fixed;
+    /* display: block !important; hata diya gaya hai taaki JS isko hide/show kar sake */
 
-    top: 3vh;
-    left: 50%;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
 
-    transform: translateX(-50%);
+    padding: 18px !important;
+    border-radius: 22px !important;
 
-    width: min(94vw, 900px);
-
-    height: 90vh;
-
-    max-height: 90vh;
-
-    box-sizing: border-box;
-
-    z-index: 9999;
-
-    display: flex;
-
-    flex-direction: column;
-
-    overflow: hidden;
-
-    padding: 18px;
-
-    border-radius: 22px;
-
-    background:
-        radial-gradient(
-            circle at top,
-            rgba(31, 112, 72, .98),
-            rgba(3, 20, 14, .99)
-        );
-
-    border:
-        1px solid
-        rgba(255, 215, 130, .28);
-
-    box-shadow:
-        0 30px 100px
-        rgba(0,0,0,.8);
-
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
 }
 
 
