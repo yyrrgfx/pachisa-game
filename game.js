@@ -126,40 +126,22 @@ function listenToRoomUpdates() {
                 }
             }
 
-            // Start battle ONLY when all 3 players have valid 5 groups
+            // === YEH NAYA SIMPLE CHECK HAI (Strict check hata diya gaya) ===
             let allLocked = globalPlayerNames.length === 3;
-            let validBattleData = allLocked;
-
             if (allLocked) {
                 for (const p of globalPlayerNames) {
-                    const playerData = playersData[p];
-
-                    if (!playerData || playerData.status !== "LOCKED") {
+                    // Sirf check karo ki player hai aur uska status LOCKED hai
+                    if (!playersData[p] || playersData[p].status !== "LOCKED") {
                         allLocked = false;
-                        validBattleData = false;
                         break;
                     }
-
-                    if (!Array.isArray(playerData.lockedSlots) || playerData.lockedSlots.length !== 5) {
-                        validBattleData = false;
-                        break;
-                    }
-
-                    for (let i = 0; i < 5; i++) {
-                        const group = playerData.lockedSlots[i];
-                        if (!group || !Array.isArray(group.cards) || group.cards.length !== 3) {
-                            validBattleData = false;
-                            break;
-                        }
-                    }
-
-                    if (!validBattleData) break;
                 }
             }
 
-            if (allLocked && validBattleData && !isBattleRunning) {
-                console.log("All 3 players have valid 5 groups. Starting battle...");
-                startBattleAnimation(playersData);
+            // Jab teeno lock kar dein, toh naya MANUAL battle function trigger karo
+            if (allLocked && !isBattleRunning) {
+                console.log("Sabne lock kar diya! Battle shuru...");
+                startManualBattle(playersData); 
             }
         }
     });
@@ -180,7 +162,7 @@ function listenToRoomUpdates() {
                 
                 let unusablePile = document.getElementById('unusable-pile');
                 if(unusablePile) unusablePile.innerText = "1 Card";
-            }, 1000); // 1 second dealing animation delay
+            }, 1000); 
         }
     });
 }
@@ -337,93 +319,134 @@ lockBtn.addEventListener('click', () => {
     });
 });
 
-
 // ==========================================
-// 6. EPIC BATTLE ANIMATION & SCORING
+// 6. EPIC BATTLE ANIMATION & SCORING (MANUAL)
 // ==========================================
 let isBattleRunning = false;
+let currentBattleSlot = 0;
+let battlePlayersData = null;
+let roundPoints = {};
+let lastRoundHistoryHTML = '';
 
-function startBattleAnimation(playersData) {
+function startManualBattle(playersData) {
     if(isBattleRunning) return; 
     isBattleRunning = true;
+    battlePlayersData = playersData;
+    currentBattleSlot = 0;
+    lastRoundHistoryHTML = '';
+
+    globalPlayerNames.forEach(n => roundPoints[n] = 0);
 
     let battleArena = document.getElementById('battle-arena');
+    if(battleArena) {
+        battleArena.style.setProperty('display', 'flex', 'important');
+        battleArena.style.flexDirection = 'column'; // Vertical align ensure karna
+    }
+    
+    // UI SCROLLING DISABLE KARNA BATTLE KE TIME
+    document.body.style.overflow = 'hidden';
+
+    renderBattleSlot();
+}
+
+function renderBattleSlot() {
     let battleTitle = document.getElementById('battle-title');
     let battleCards = document.getElementById('battle-cards');
     let battleWinner = document.getElementById('battle-winner');
+    let stepNumber = document.getElementById('battle-step-number');
+    let nextBtn = document.getElementById('battle-next-btn');
+
+    if(stepNumber) stepNumber.innerText = currentBattleSlot + 1;
+    if(battleTitle) battleTitle.innerText = `Fighting: SLOT ${currentBattleSlot + 1}`;
     
-    // Battle start hone par dikhane ke liye
-if(battleArena) battleArena.style.setProperty('display', 'flex', 'important');
-    
-    let currentSlot = 0;
-    let roundPoints = {};
-    globalPlayerNames.forEach(n => roundPoints[n] = 0);
+    let slotWinner = null;
+    let highestScore = -1;
+    let slotCardsHTML = ''; 
+    let arenaHTML = '';
 
-    // YEH VARIABLE HISTORY STORE KAREGA
-    let lastRoundHistoryHTML = ''; 
+    globalPlayerNames.forEach(name => {
+        let slotData = battlePlayersData[name].lockedSlots[currentBattleSlot];
+        
+        let c1 = slotData.cards[0], c2 = slotData.cards[1], c3 = slotData.cards[2];
+        let r1 = rankNames[c1.rank] || c1.rank, r2 = rankNames[c2.rank] || c2.rank, r3 = rankNames[c3.rank] || c3.rank;
+        let s1 = suitSymbols[c1.suit], s2 = suitSymbols[c2.suit], s3 = suitSymbols[c3.suit];
+        let cardString = `${r1}${s1} | ${r2}${s2} | ${r3}${s3}`;
 
-    let battleInterval = setInterval(() => {
-        if(currentSlot > 4) {
-            clearInterval(battleInterval);
-           // Battle khatam hone par wapas chupane ke liye
-if(battleArena) battleArena.style.setProperty('display', 'none', 'important');
-            
-            // BATTLE KHATAM HONE PAR HISTORY MODAL MEIN DATA DAAL DO
-            document.getElementById('history-content').innerHTML = lastRoundHistoryHTML;
-            
-            updateGlobalScores(roundPoints); 
-            return;
-        }
-
-        let slotWinner = null;
-        let highestScore = -1;
-        let slotCardsHTML = ''; // History ke liye is round ke cards
-
-        if(battleCards) battleCards.innerHTML = ''; 
-        if(battleTitle) battleTitle.innerText = `Fighting: SLOT ${currentSlot + 1}`;
-
-        globalPlayerNames.forEach(name => {
-            let slotData = playersData[name].lockedSlots[currentSlot];
-            
-            // J, Q, K, A format karna
-            let c1 = slotData.cards[0], c2 = slotData.cards[1], c3 = slotData.cards[2];
-            let r1 = rankNames[c1.rank] || c1.rank, r2 = rankNames[c2.rank] || c2.rank, r3 = rankNames[c3.rank] || c3.rank;
-            let s1 = suitSymbols[c1.suit], s2 = suitSymbols[c2.suit], s3 = suitSymbols[c3.suit];
-
-            let cardString = `${r1}${s1} | ${r2}${s2} | ${r3}${s3}`;
-
-            // Screen par fight dikhana
-            if(battleCards) {
-                battleCards.innerHTML += `<div style="display:inline-block; margin: 15px; padding:10px; background:#fff; color:#000; border-radius:5px;">
-                    <strong>${name}</strong><br>${cardString}
-                </div>`;
-            }
-
-            // History panel ke liye row banana
-            slotCardsHTML += `<div class="history-player"><strong>${name}</strong><br>${cardString}</div>`;
-
-            if(slotData.score > highestScore) {
-                highestScore = slotData.score;
-                slotWinner = name;
-            }
-        });
-
-        // Is slot ki history record karna
-        lastRoundHistoryHTML += `
-            <div style="background: #1a252f; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid #7f8c8d;">
-                <h4 style="margin: 0 0 10px 0; color: #f1c40f;">Slot ${currentSlot + 1} - Winner: 🎉 ${slotWinner}</h4>
-                <div class="history-row">${slotCardsHTML}</div>
+        // Naye Premium UI Grid ke liye cards generate karna
+        arenaHTML += `
+            <div class="battle-player-card">
+                <div class="battle-player-name">${name}</div>
+                <div class="battle-playing-cards">
+                    <div class="battle-single-card ${(c1.suit==='Hearts'||c1.suit==='Diamonds')?'battle-red':'battle-black'}">
+                        ${r1}<span>${s1}</span>
+                    </div>
+                    <div class="battle-single-card ${(c2.suit==='Hearts'||c2.suit==='Diamonds')?'battle-red':'battle-black'}">
+                        ${r2}<span>${s2}</span>
+                    </div>
+                    <div class="battle-single-card ${(c3.suit==='Hearts'||c3.suit==='Diamonds')?'battle-red':'battle-black'}">
+                        ${r3}<span>${s3}</span>
+                    </div>
+                </div>
             </div>
         `;
 
-        if(battleWinner) battleWinner.innerText = `🎉 ${slotWinner} wins Slot ${currentSlot + 1}!`;
-        roundPoints[slotWinner] += 1;
-        
-        currentSlot++;
-    }, 3000); 
+        slotCardsHTML += `<div class="history-player"><strong>${name}</strong><br>${cardString}</div>`;
+
+        if(slotData.score > highestScore) {
+            highestScore = slotData.score;
+            slotWinner = name;
+        }
+    });
+
+    if(battleCards) battleCards.innerHTML = arenaHTML;
+
+    // History Record karna
+    lastRoundHistoryHTML += `
+        <div class="history-battle-round">
+            <div class="history-round-header">
+                <strong>Slot ${currentBattleSlot + 1}</strong>
+                <span>🎉 Winner: ${slotWinner}</span>
+            </div>
+            <div class="history-row">${slotCardsHTML}</div>
+        </div>
+    `;
+
+    if(battleWinner) {
+        battleWinner.innerHTML = `<div class="battle-result"><strong>Slot ${currentBattleSlot + 1} Winner:</strong> <span>🎉 ${slotWinner}</span></div>`;
+    }
+    
+    roundPoints[slotWinner] += 1;
+
+    // Button Text Update karna
+    if (currentBattleSlot < 4) {
+        nextBtn.innerText = `Next → Slot ${currentBattleSlot + 2}`;
+    } else {
+        nextBtn.innerText = "Finish Round & Show Scores";
+    }
 }
+
+// ------------------------------------
+// BATTLE NEXT BUTTON CLICK LISTENER
+// ------------------------------------
+document.getElementById('battle-next-btn').addEventListener('click', () => {
+    currentBattleSlot++;
+    
+    if (currentBattleSlot > 4) {
+        // BATTLE KHATAM
+        let battleArena = document.getElementById('battle-arena');
+        if(battleArena) battleArena.style.setProperty('display', 'none', 'important');
+        
+        // SCROLL WAPAS ON KARNA
+        document.body.style.overflow = 'auto'; 
+        
+        document.getElementById('history-content').innerHTML = lastRoundHistoryHTML;
+        updateGlobalScores(roundPoints);
+    } else {
+        renderBattleSlot();
+    }
+});
+
 function updateGlobalScores(roundPoints) {
-    // Sirf Host update push karega DB me taaki 3 guna data na badhe
     if (isRoomCreator) {
         db.ref(`rooms/${roomId}/global_scores`).once('value', snap => {
             let currentScores = snap.val() || {};
@@ -433,29 +456,25 @@ function updateGlobalScores(roundPoints) {
             db.ref(`rooms/${roomId}/global_scores`).set(currentScores);
         });
     }
-
-    // Har player ki screen pe next round ki taiyari
     setTimeout(() => resetRound(), 2000);
 }
 
-// Watch Global Scores to update Floating Scoreboard UI
 db.ref(`rooms/${roomId}/global_scores`).on('value', snap => {
     if(snap.exists()) {
         let scores = snap.val();
-        let tableHTML = `<tr><th>Player</th><th>Points</th></tr>`;
+        let tableHTML = ``;
         let winner = null;
 
         for (let p in scores) {
-            tableHTML += `<tr><td>${p}</td><td>${scores[p]}</td></tr>`;
+            tableHTML += `<tr><td>${p}</td><td class="score-points">${scores[p]}</td></tr>`;
             if (scores[p] >= 25) winner = p;
         }
         
-        let scoreTable = document.getElementById('score-table');
+        let scoreTable = document.querySelector('#score-table tbody');
         if(scoreTable) scoreTable.innerHTML = tableHTML;
 
         if (winner) {
             alert(`🎉 GAME OVER! ${winner} WINS WITH 25 POINTS! 🎉`);
-            // Yahan se aap game ko pura reset kara sakte hain
         }
     }
 });
@@ -469,11 +488,10 @@ function resetRound() {
     
     lockBtn.disabled = true;
     lockBtn.innerText = "Lock Cards";
+    document.getElementById('slots-area').style.pointerEvents = 'auto'; // Slots wapas active
     
-    // Status wapas joined kardo
     db.ref(`rooms/${roomId}/players/${playerName}`).update({ status: "JOINED" });
     
-    // Host naya deck fainkega
     if(isRoomCreator) {
         setTimeout(() => {
             let deck = shuffleDeck(generateDeck());
@@ -486,9 +504,17 @@ function resetRound() {
         }, 1000);
     }
 }
-// Score & History Modal Logic
+
+// ------------------------------------
+// UI BUTTON FIXES
+// ------------------------------------
 document.getElementById('show-score-btn').onclick = () => document.getElementById('scoreboard-modal').style.display = 'block';
-document.getElementById('close-score').onclick = () => document.getElementById('scoreboard-modal').style.display = 'none';
+document.querySelector('#scoreboard-modal .modal-close').onclick = () => document.getElementById('scoreboard-modal').style.display = 'none';
 
 document.getElementById('show-history-btn').onclick = () => document.getElementById('history-modal').style.display = 'block';
 document.getElementById('close-history').onclick = () => document.getElementById('history-modal').style.display = 'none';
+
+// Cards Lock hone par drag aur scroll band karna
+lockBtn.addEventListener('click', () => {
+    document.getElementById('slots-area').style.pointerEvents = 'none'; // Lock ke baad UI block
+});
