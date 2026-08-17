@@ -42,12 +42,6 @@ const slots = document.querySelectorAll('.slot');
 const lockBtn = document.getElementById('lock-btn');
 let draggedCard = null;
 
-const initialBattleArena = document.getElementById('battle-arena');
-if (initialBattleArena) initialBattleArena.style.display = 'none';
-
-// Inject only after DOM exists; function declaration is hoisted.
-injectGameFixStyles();
-
 
 // ==========================================
 // 3. LOBBY & ROOM MANAGEMENT
@@ -102,7 +96,6 @@ function enterRoom(rId, pName) {
     document.getElementById('display-room-id').innerText = roomId;
 
     listenToRoomUpdates();
-    listenToGlobalScores();
 }
 
 function listenToRoomUpdates() {
@@ -133,43 +126,62 @@ function listenToRoomUpdates() {
                 }
             }
 
-            // Check if all players locked their cards to start battle
-            let allLocked = true;
-            for(let p in playersData) {
-                if(playersData[p].status !== "LOCKED") allLocked = false;
-            }
-            // Firebase kabhi-kabhi arrays ko object ke form me return karta hai.
-            // Isliye pehle normalize karke hi battle start karo.
-            const readyForBattle =
-                allLocked &&
-                globalPlayerNames.length === 3 &&
-                globalPlayerNames.every(name => getValidLockedSlots(playersData[name]).length === 5);
+            // Start battle ONLY when all 3 players have valid 5 groups
+            let allLocked = globalPlayerNames.length === 3;
+            let validBattleData = allLocked;
 
-            if (readyForBattle) {
+            if (allLocked) {
+                for (const p of globalPlayerNames) {
+                    const playerData = playersData[p];
+
+                    if (!playerData || playerData.status !== "LOCKED") {
+                        allLocked = false;
+                        validBattleData = false;
+                        break;
+                    }
+
+                    if (!Array.isArray(playerData.lockedSlots) || playerData.lockedSlots.length !== 5) {
+                        validBattleData = false;
+                        break;
+                    }
+
+                    for (let i = 0; i < 5; i++) {
+                        const group = playerData.lockedSlots[i];
+                        if (!group || !Array.isArray(group.cards) || group.cards.length !== 3) {
+                            validBattleData = false;
+                            break;
+                        }
+                    }
+
+                    if (!validBattleData) break;
+                }
+            }
+
+            if (allLocked && validBattleData && !isBattleRunning) {
+                console.log("All 3 players have valid 5 groups. Starting battle...");
                 startBattleAnimation(playersData);
             }
         }
     });
 
     // 2. Watch for cards being dealt
-    let lastDealSignature = '';
-
     db.ref(`rooms/${roomId}/current_round`).on('value', (snap) => {
-        if (!snap.exists()) return;
-
-        const roundData = snap.val();
-        const myIndex = globalPlayerNames.indexOf(playerName);
-        if (myIndex < 0) return;
-
-        const myCards = myIndex === 0
-            ? roundData.p1_cards
-            : (myIndex === 1 ? roundData.p2_cards : roundData.p3_cards);
-
-        const signature = JSON.stringify(roundData);
-        if (signature === lastDealSignature) return;
-        lastDealSignature = signature;
-
-        animateDeal(roundData, myCards);
+        if(snap.exists()){
+            let roundData = snap.val();
+            let deckVis = document.getElementById('deck-visual');
+            if(deckVis) deckVis.innerText = "Dealing...";
+            
+            setTimeout(() => {
+                let myIndex = globalPlayerNames.indexOf(playerName);
+                let myCards = myIndex === 0 ? roundData.p1_cards : (myIndex === 1 ? roundData.p2_cards : roundData.p3_cards);
+                
+                renderPlayerHand(myCards);
+                if(deckVis) deckVis.innerText = "Empty";
+                
+                let unusablePile = document.getElementById('unusable-pile');
+                if(unusablePile) unusablePile.innerText = "1 Card";
+            }, 1000); // 1 second dealing animation delay
+        }
     });
 }
 
@@ -327,254 +339,87 @@ lockBtn.addEventListener('click', () => {
 
 
 // ==========================================
-// 6. DEAL ANIMATION + EPIC BATTLE
+// 6. EPIC BATTLE ANIMATION & SCORING
 // ==========================================
 let isBattleRunning = false;
 
-function injectGameFixStyles() {
-    if (document.getElementById('pachisa-game-fix-style')) return;
-    const style = document.createElement('style');
-    style.id = 'pachisa-game-fix-style';
-    style.textContent = `
-        #player-hand {
-            position: fixed !important;
-            left: 50% !important;
-            bottom: 8px !important;
-            transform: translateX(-50%) !important;
-            z-index: 900 !important;
-            width: min(96vw, 760px) !important;
-            min-height: 62px !important;
-            padding: 6px 8px !important;
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 0 !important;
-            overflow: visible !important;
-            background: rgba(8,28,22,.92) !important;
-            border: 1px solid rgba(255,215,130,.25) !important;
-            border-radius: 14px !important;
-            box-shadow: 0 -8px 30px rgba(0,0,0,.38) !important;
-        }
-        #player-hand .card {
-            width: 42px !important;
-            height: 60px !important;
-            min-width: 42px !important;
-            min-height: 60px !important;
-            margin-left: -11px !important;
-            flex: 0 0 42px !important;
-            position: relative !important;
-            z-index: 1;
-            font-size: 1rem !important;
-        }
-        #player-hand .card:first-child { margin-left: 0 !important; }
-        #player-hand .card:hover, #player-hand .card:active { z-index: 20 !important; }
-        #battle-arena {
-            position: fixed !important;
-            top: 3vh !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            width: min(94vw, 900px) !important;
-            height: 90vh !important;
-            max-height: 90vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            box-sizing: border-box !important;
-            z-index: 5000 !important;
-            -webkit-overflow-scrolling: touch !important;
-        }
-        #battle-next-btn {
-            display: block !important;
-            position: sticky !important;
-            bottom: 4px !important;
-            z-index: 50 !important;
-            width: min(100%, 420px) !important;
-            margin: 18px auto 4px !important;
-            padding: 14px 20px !important;
-            border: 0 !important;
-            border-radius: 14px !important;
-            background: linear-gradient(135deg,#f1c40f,#e67e22) !important;
-            color: #171717 !important;
-            font-size: 1rem !important;
-            font-weight: 900 !important;
-            cursor: pointer !important;
-            box-shadow: 0 8px 25px rgba(0,0,0,.45) !important;
-        }
-        .pachisa-flying-card {
-            position: fixed !important;
-            width: 28px !important;
-            height: 42px !important;
-            border-radius: 5px !important;
-            background: linear-gradient(135deg,#244f42,#0a241c) !important;
-            border: 2px solid rgba(255,215,130,.9) !important;
-            box-shadow: 0 5px 15px rgba(0,0,0,.5) !important;
-            z-index: 100000 !important;
-            pointer-events: none !important;
-            animation: pachisaFly .55s cubic-bezier(.2,.8,.3,1) forwards !important;
-        }
-        .pachisa-flying-card::after {
-            content: '♠♥♦♣'; position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            color: #f1c40f; font-size: 10px;
-        }
-        @keyframes pachisaFly {
-            0% { opacity:1; transform:translate(0,0) scale(.7) rotate(-12deg); }
-            100% { opacity:0; transform:translate(var(--dx),var(--dy)) scale(.85) rotate(12deg); }
-        }
-        .card.dealing { animation: pachisaHandDeal .4s cubic-bezier(.2,.8,.3,1) both !important; }
-        @keyframes pachisaHandDeal {
-            0% { opacity:0; transform:translateY(-35px) scale(.65); }
-            70% { opacity:1; transform:translateY(4px) scale(1.03); }
-            100% { opacity:1; transform:translateY(0) scale(1); }
-        }
-        @media (max-width:700px) {
-            #player-hand { width:98vw !important; bottom:5px !important; padding:5px 6px !important; }
-            #player-hand .card { width:29px !important; height:43px !important; min-width:29px !important; min-height:43px !important; flex-basis:29px !important; margin-left:-9px !important; font-size:.78rem !important; }
-            #player-hand .card:first-child { margin-left:0 !important; }
-            #battle-arena { top:2vh !important; width:94vw !important; height:94vh !important; max-height:94vh !important; padding:15px !important; }
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-function ensureBattleButton(battleArena) {
-    let btn = document.getElementById('battle-next-btn');
-    if (!btn) {
-        btn = document.createElement('button');
-        btn.id = 'battle-next-btn';
-        btn.className = 'battle-next-btn';
-        btn.type = 'button';
-        battleArena.appendChild(btn);
-    }
-    return btn;
-}
-
-function animateDeal(roundData, myCards) {
-    injectGameFixStyles();
-    const table = document.getElementById('virtual-table');
-    const deck = document.getElementById('deck-visual');
-    const opp1 = document.getElementById('opp1-avatar');
-    const opp2 = document.getElementById('opp2-avatar');
-    const targets = [opp1, playerHandDiv, opp2].filter(Boolean);
-    if (!table || !deck || !targets.length) { renderPlayerHand(myCards); return; }
-
-    table.querySelectorAll('.pachisa-flying-card').forEach(el => el.remove());
-    const deckRect = deck.getBoundingClientRect();
-    deck.innerText = 'Dealing...';
-
-    for (let i = 0; i < 51; i++) {
-        setTimeout(() => {
-            const target = targets[i % targets.length];
-            const targetRect = target.getBoundingClientRect();
-            const fly = document.createElement('div');
-            fly.className = 'pachisa-flying-card';
-            fly.style.left = `${deckRect.left + deckRect.width / 2 - 14}px`;
-            fly.style.top = `${deckRect.top + deckRect.height / 2 - 21}px`;
-            fly.style.setProperty('--dx', `${targetRect.left + targetRect.width/2 - (deckRect.left + deckRect.width/2)}px`);
-            fly.style.setProperty('--dy', `${targetRect.top + targetRect.height/2 - (deckRect.top + deckRect.height/2)}px`);
-            document.body.appendChild(fly);
-            setTimeout(() => fly.remove(), 600);
-        }, i * 55);
-    }
-
-    setTimeout(() => {
-        renderPlayerHand(myCards);
-        deck.innerText = 'Empty';
-        const unusable = document.getElementById('unusable-pile');
-        if (unusable) unusable.innerText = '1 Card';
-    }, 51 * 55 + 250);
-}
-
-function getValidLockedSlots(playerData) {
-    if (!playerData || !playerData.lockedSlots) return [];
-    const raw = playerData.lockedSlots;
-    const slotsData = Array.isArray(raw) ? raw : Object.keys(raw).sort((a,b) => Number(a)-Number(b)).map(k => raw[k]);
-    return slotsData.map(slot => {
-        if (!slot) return null;
-        const rawCards = slot.cards;
-        const cards = Array.isArray(rawCards)
-            ? rawCards
-            : (rawCards ? Object.keys(rawCards).sort((a,b)=>Number(a)-Number(b)).map(k=>rawCards[k]) : []);
-        return { score: Number(slot.score || 0), cards: cards.filter(Boolean).slice(0,3) };
-    }).filter(slot => slot && slot.cards.length === 3).slice(0,5);
-}
-
 function startBattleAnimation(playersData) {
-    if (isBattleRunning) return;
-    const normalized = {};
-    const valid = globalPlayerNames.length === 3 && globalPlayerNames.every(name => {
-        normalized[name] = getValidLockedSlots(playersData[name]);
-        return normalized[name].length === 5;
-    });
-    if (!valid) {
-        console.log('Battle waiting: valid 5 x 3-card locked data not available yet.');
-        return;
-    }
-
-    injectGameFixStyles();
+    if(isBattleRunning) return; 
     isBattleRunning = true;
-    const battleArena = document.getElementById('battle-arena');
-    const battleTitle = document.getElementById('battle-title');
-    const battleCards = document.getElementById('battle-cards');
-    const battleWinner = document.getElementById('battle-winner');
-    if (!battleArena || !battleCards || !battleTitle || !battleWinner) return;
-    const nextBtn = ensureBattleButton(battleArena);
-    battleArena.style.display = 'block';
 
+    let battleArena = document.getElementById('battle-arena');
+    let battleTitle = document.getElementById('battle-title');
+    let battleCards = document.getElementById('battle-cards');
+    let battleWinner = document.getElementById('battle-winner');
+    
+    if(battleArena) battleArena.style.display = 'block';
+    
     let currentSlot = 0;
-    const roundPoints = {};
+    let roundPoints = {};
     globalPlayerNames.forEach(n => roundPoints[n] = 0);
-    let historyHTML = '';
 
-    function showSlot() {
-        if (currentSlot >= 5) {
-            battleArena.style.display = 'none';
-            nextBtn.style.display = 'none';
-            document.getElementById('history-content').innerHTML = historyHTML;
-            updateGlobalScores(roundPoints);
+    // YEH VARIABLE HISTORY STORE KAREGA
+    let lastRoundHistoryHTML = ''; 
+
+    let battleInterval = setInterval(() => {
+        if(currentSlot > 4) {
+            clearInterval(battleInterval);
+            if(battleArena) battleArena.style.display = 'none';
+            
+            // BATTLE KHATAM HONE PAR HISTORY MODAL MEIN DATA DAAL DO
+            document.getElementById('history-content').innerHTML = lastRoundHistoryHTML;
+            
+            updateGlobalScores(roundPoints); 
             return;
         }
 
         let slotWinner = null;
         let highestScore = -1;
-        let slotCardsHTML = '';
-        battleCards.innerHTML = '';
-        battleWinner.innerText = '';
-        battleTitle.innerText = `Fighting: SLOT ${currentSlot + 1}`;
+        let slotCardsHTML = ''; // History ke liye is round ke cards
+
+        if(battleCards) battleCards.innerHTML = ''; 
+        if(battleTitle) battleTitle.innerText = `Fighting: SLOT ${currentSlot + 1}`;
 
         globalPlayerNames.forEach(name => {
-            const slotData = normalized[name][currentSlot];
-            const cards = slotData.cards;
-            const cardString = cards.map(c => `${rankNames[c.rank] || c.rank}${suitSymbols[c.suit]}`).join(' | ');
-            battleCards.innerHTML += `
-                <div class="battle-player-card">
-                    <strong>${name}</strong>
-                    <div class="battle-playing-cards">
-                        ${cards.map(c => `<div class="battle-single-card"><span>${rankNames[c.rank] || c.rank}</span><span>${suitSymbols[c.suit]}</span></div>`).join('')}
-                    </div>
-                    <div class="battle-combination">${cardString}</div>
+            let slotData = playersData[name].lockedSlots[currentSlot];
+            
+            // J, Q, K, A format karna
+            let c1 = slotData.cards[0], c2 = slotData.cards[1], c3 = slotData.cards[2];
+            let r1 = rankNames[c1.rank] || c1.rank, r2 = rankNames[c2.rank] || c2.rank, r3 = rankNames[c3.rank] || c3.rank;
+            let s1 = suitSymbols[c1.suit], s2 = suitSymbols[c2.suit], s3 = suitSymbols[c3.suit];
+
+            let cardString = `${r1}${s1} | ${r2}${s2} | ${r3}${s3}`;
+
+            // Screen par fight dikhana
+            if(battleCards) {
+                battleCards.innerHTML += `<div style="display:inline-block; margin: 15px; padding:10px; background:#fff; color:#000; border-radius:5px;">
+                    <strong>${name}</strong><br>${cardString}
                 </div>`;
+            }
+
+            // History panel ke liye row banana
             slotCardsHTML += `<div class="history-player"><strong>${name}</strong><br>${cardString}</div>`;
-            if (Number(slotData.score) > highestScore) {
-                highestScore = Number(slotData.score);
+
+            if(slotData.score > highestScore) {
+                highestScore = slotData.score;
                 slotWinner = name;
             }
         });
 
+        // Is slot ki history record karna
+        lastRoundHistoryHTML += `
+            <div style="background: #1a252f; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid #7f8c8d;">
+                <h4 style="margin: 0 0 10px 0; color: #f1c40f;">Slot ${currentSlot + 1} - Winner: 🎉 ${slotWinner}</h4>
+                <div class="history-row">${slotCardsHTML}</div>
+            </div>
+        `;
+
+        if(battleWinner) battleWinner.innerText = `🎉 ${slotWinner} wins Slot ${currentSlot + 1}!`;
         roundPoints[slotWinner] += 1;
-        battleWinner.innerText = `🎉 ${slotWinner} wins Slot ${currentSlot + 1}! +1 Point`;
-        historyHTML += `<div style="background:#1a252f;margin-bottom:15px;padding:10px;border-radius:8px;border:1px solid #7f8c8d;"><h4 style="margin:0 0 10px;color:#f1c40f;">Slot ${currentSlot + 1} - Winner: 🎉 ${slotWinner}</h4><div class="history-row">${slotCardsHTML}</div></div>`;
-
-        nextBtn.innerText = currentSlot === 4 ? 'Finish Round ✓' : `Next → Slot ${currentSlot + 2}`;
-        nextBtn.style.display = 'block';
-        battleArena.scrollTop = 0;
+        
         currentSlot++;
-    }
-
-    nextBtn.onclick = showSlot;
-    showSlot();
+    }, 3000); 
 }
-
 function updateGlobalScores(roundPoints) {
     // Sirf Host update push karega DB me taaki 3 guna data na badhe
     if (isRoomCreator) {
@@ -592,29 +437,29 @@ function updateGlobalScores(roundPoints) {
 }
 
 // Watch Global Scores to update Floating Scoreboard UI
-function listenToGlobalScores() {
-    if (!roomId) return;
-    db.ref(`rooms/${roomId}/global_scores`).on('value', snap => {
-        if (!snap.exists()) return;
-        const scores = snap.val();
+db.ref(`rooms/${roomId}/global_scores`).on('value', snap => {
+    if(snap.exists()) {
+        let scores = snap.val();
         let tableHTML = `<tr><th>Player</th><th>Points</th></tr>`;
         let winner = null;
+
         for (let p in scores) {
             tableHTML += `<tr><td>${p}</td><td>${scores[p]}</td></tr>`;
-            if (Number(scores[p]) >= 25) winner = p;
+            if (scores[p] >= 25) winner = p;
         }
-        const scoreTable = document.getElementById('score-table');
-        if (scoreTable) scoreTable.innerHTML = tableHTML;
-        if (winner) alert(`🎉 GAME OVER! ${winner} WINS WITH 25 POINTS! 🎉`);
-    });
-}
+        
+        let scoreTable = document.getElementById('score-table');
+        if(scoreTable) scoreTable.innerHTML = tableHTML;
+
+        if (winner) {
+            alert(`🎉 GAME OVER! ${winner} WINS WITH 25 POINTS! 🎉`);
+            // Yahan se aap game ko pura reset kara sakte hain
+        }
+    }
+});
 
 function resetRound() {
     isBattleRunning = false;
-    const battleArena = document.getElementById('battle-arena');
-    if (battleArena) battleArena.style.display = 'none';
-    const nextBtn = document.getElementById('battle-next-btn');
-    if (nextBtn) nextBtn.style.display = 'none';
     playerHandDiv.innerHTML = '';
     slots.forEach((slot, i) => {
         slot.innerHTML = `Slot ${i + 1}`;
