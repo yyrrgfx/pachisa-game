@@ -138,14 +138,12 @@ function listenToRoomUpdates() {
             for(let p in playersData) {
                 if(playersData[p].status !== "LOCKED") allLocked = false;
             }
+            // Firebase kabhi-kabhi arrays ko object ke form me return karta hai.
+            // Isliye pehle normalize karke hi battle start karo.
             const readyForBattle =
                 allLocked &&
                 globalPlayerNames.length === 3 &&
-                globalPlayerNames.every(name =>
-                    playersData[name] &&
-                    Array.isArray(playersData[name].lockedSlots) &&
-                    playersData[name].lockedSlots.length === 5
-                );
+                globalPlayerNames.every(name => getValidLockedSlots(playersData[name]).length === 5);
 
             if (readyForBattle) {
                 startBattleAnimation(playersData);
@@ -487,12 +485,31 @@ function animateDeal(roundData, myCards) {
     }, 51 * 55 + 250);
 }
 
+function getValidLockedSlots(playerData) {
+    if (!playerData || !playerData.lockedSlots) return [];
+    const raw = playerData.lockedSlots;
+    const slotsData = Array.isArray(raw) ? raw : Object.keys(raw).sort((a,b) => Number(a)-Number(b)).map(k => raw[k]);
+    return slotsData.map(slot => {
+        if (!slot) return null;
+        const rawCards = slot.cards;
+        const cards = Array.isArray(rawCards)
+            ? rawCards
+            : (rawCards ? Object.keys(rawCards).sort((a,b)=>Number(a)-Number(b)).map(k=>rawCards[k]) : []);
+        return { score: Number(slot.score || 0), cards: cards.filter(Boolean).slice(0,3) };
+    }).filter(slot => slot && slot.cards.length === 3).slice(0,5);
+}
+
 function startBattleAnimation(playersData) {
     if (isBattleRunning) return;
-    const valid = globalPlayerNames.length === 3 && globalPlayerNames.every(name =>
-        playersData[name] && Array.isArray(playersData[name].lockedSlots) && playersData[name].lockedSlots.length === 5
-    );
-    if (!valid) return;
+    const normalized = {};
+    const valid = globalPlayerNames.length === 3 && globalPlayerNames.every(name => {
+        normalized[name] = getValidLockedSlots(playersData[name]);
+        return normalized[name].length === 5;
+    });
+    if (!valid) {
+        console.log('Battle waiting: valid 5 x 3-card locked data not available yet.');
+        return;
+    }
 
     injectGameFixStyles();
     isBattleRunning = true;
@@ -500,6 +517,7 @@ function startBattleAnimation(playersData) {
     const battleTitle = document.getElementById('battle-title');
     const battleCards = document.getElementById('battle-cards');
     const battleWinner = document.getElementById('battle-winner');
+    if (!battleArena || !battleCards || !battleTitle || !battleWinner) return;
     const nextBtn = ensureBattleButton(battleArena);
     battleArena.style.display = 'block';
 
@@ -525,7 +543,7 @@ function startBattleAnimation(playersData) {
         battleTitle.innerText = `Fighting: SLOT ${currentSlot + 1}`;
 
         globalPlayerNames.forEach(name => {
-            const slotData = playersData[name].lockedSlots[currentSlot];
+            const slotData = normalized[name][currentSlot];
             const cards = slotData.cards;
             const cardString = cards.map(c => `${rankNames[c.rank] || c.rank}${suitSymbols[c.suit]}`).join(' | ');
             battleCards.innerHTML += `
