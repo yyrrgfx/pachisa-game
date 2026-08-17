@@ -773,6 +773,7 @@ body{min-height:100vh;margin:0;background:radial-gradient(circle at top,rgba(46,
 @media (max-width: 700px) {
 
     #battle-arena {
+        display:none;
 
         top: 2%;
 
