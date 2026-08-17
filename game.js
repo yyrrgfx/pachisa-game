@@ -352,7 +352,8 @@ function startBattleAnimation(playersData) {
     let battleCards = document.getElementById('battle-cards');
     let battleWinner = document.getElementById('battle-winner');
     
-    if(battleArena) battleArena.style.display = 'block';
+    // Battle start hone par dikhane ke liye
+if(battleArena) battleArena.style.setProperty('display', 'flex', 'important');
     
     let currentSlot = 0;
     let roundPoints = {};
@@ -364,7 +365,8 @@ function startBattleAnimation(playersData) {
     let battleInterval = setInterval(() => {
         if(currentSlot > 4) {
             clearInterval(battleInterval);
-            if(battleArena) battleArena.style.display = 'none';
+           // Battle khatam hone par wapas chupane ke liye
+if(battleArena) battleArena.style.setProperty('display', 'none', 'important');
             
             // BATTLE KHATAM HONE PAR HISTORY MODAL MEIN DATA DAAL DO
             document.getElementById('history-content').innerHTML = lastRoundHistoryHTML;
